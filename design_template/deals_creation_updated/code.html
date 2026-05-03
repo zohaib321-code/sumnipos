@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-primary-container": "#f8f7ff",
+                    "secondary": "#006c49",
+                    "inverse-primary": "#b3c5ff",
+                    "on-primary-fixed-variant": "#003fa4",
+                    "on-primary-fixed": "#001849",
+                    "surface-dim": "#d8d9e6",
+                    "tertiary": "#a33200",
+                    "surface-container-lowest": "#ffffff",
+                    "tertiary-container": "#cc4204",
+                    "surface-container-low": "#f2f3ff",
+                    "surface": "#faf8ff",
+                    "primary-fixed": "#dae1ff",
+                    "on-secondary": "#ffffff",
+                    "on-tertiary-fixed": "#390c00",
+                    "on-tertiary": "#ffffff",
+                    "on-secondary-fixed-variant": "#005236",
+                    "secondary-fixed-dim": "#4edea3",
+                    "inverse-on-surface": "#eff0fd",
+                    "on-tertiary-fixed-variant": "#832600",
+                    "on-surface": "#191b24",
+                    "surface-container": "#ecedfa",
+                    "surface-container-highest": "#e1e2ee",
+                    "on-background": "#191b24",
+                    "secondary-fixed": "#6ffbbe",
+                    "error-container": "#ffdad6",
+                    "surface-variant": "#e1e2ee",
+                    "on-surface-variant": "#424656",
+                    "on-secondary-container": "#00714d",
+                    "primary-container": "#0066ff",
+                    "primary": "#0050cb",
+                    "on-error-container": "#93000a",
+                    "primary-fixed-dim": "#b3c5ff",
+                    "tertiary-fixed-dim": "#ffb59d",
+                    "on-primary": "#ffffff",
+                    "surface-bright": "#faf8ff",
+                    "on-tertiary-container": "#fff6f4",
+                    "tertiary-fixed": "#ffdbd0",
+                    "on-secondary-fixed": "#002113",
+                    "surface-tint": "#0054d6",
+                    "inverse-surface": "#2e303a",
+                    "on-error": "#ffffff",
+                    "outline": "#727687",
+                    "background": "#faf8ff",
+                    "outline-variant": "#c2c6d8",
+                    "error": "#ba1a1a",
+                    "surface-container-high": "#e6e7f4",
+                    "secondary-container": "#6cf8bb"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "stack-gap": "16px",
+                    "margin-screen": "24px",
+                    "tile-padding": "20px",
+                    "touch-target-min": "80px",
+                    "gutter": "12px"
+            },
+            "fontFamily": {
+                    "display": ["Inter"],
+                    "numeral-lg": ["Inter"],
+                    "headline-lg": ["Inter"],
+                    "body-md": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "label-xl": ["Inter"],
+                    "headline-md": ["Inter"]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Inter', sans-serif; background-color: #F4F4F5; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="overflow-hidden">
+<!-- TopAppBar: Brand Identity & Search -->
+<header class="bg-zinc-100 dark:bg-zinc-950 border-b-2 border-zinc-200 dark:border-zinc-800 fixed top-0 h-20 w-full z-50 flex justify-between items-center px-6">
+<div class="flex items-center gap-8">
+<span class="text-2xl font-black text-blue-600 dark:text-blue-400 font-['Inter'] uppercase tracking-tight">VELOCITY POS</span>
+<!-- Navigation links removed as per request -->
+</div>
+<div class="flex items-center gap-4">
+<div class="relative w-96">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400">search</span>
+<input class="w-full bg-white border-2 border-zinc-200 h-12 pl-12 rounded-none focus:ring-0 focus:border-blue-600 font-body-md" placeholder="Search orders or products..." type="text"/>
+</div>
+<button class="h-12 w-12 flex items-center justify-center hover:bg-zinc-200 transition-colors">
+<span class="material-symbols-outlined text-zinc-600" data-icon="wifi">wifi</span>
+</button>
+<button class="h-12 w-12 flex items-center justify-center hover:bg-zinc-200 transition-colors">
+<span class="material-symbols-outlined text-zinc-600" data-icon="account_circle">account_circle</span>
+</button>
+<button class="h-12 w-12 flex items-center justify-center hover:bg-zinc-200 transition-colors">
+<span class="material-symbols-outlined text-zinc-600" data-icon="settings">settings</span>
+</button>
+</div>
+</header>
+<!-- SideNavBar: Action Context -->
+<aside class="fixed left-0 top-20 bottom-0 w-[100px] bg-white dark:bg-zinc-900 border-r-2 border-zinc-200 dark:border-zinc-800 flex flex-col items-center z-40">
+<div class="py-4 text-center">
+<p class="font-['Inter'] text-[10px] font-black text-blue-600 uppercase">OPERATOR</p>
+<p class="text-[10px] text-zinc-400 uppercase">Station 01</p>
+</div>
+<div class="w-full flex flex-col h-full">
+<a class="text-zinc-600 dark:text-zinc-400 flex flex-col items-center justify-center w-full h-20 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="grid_view">grid_view</span>
+<span class="text-[10px] font-bold uppercase mt-1">Categories</span>
+</a>
+<a class="bg-blue-600 text-white flex flex-col items-center justify-center w-full h-20" href="#">
+<span class="material-symbols-outlined" data-icon="sell" style="font-variation-settings: 'FILL' 1;">sell</span>
+<span class="text-[10px] font-bold uppercase mt-1">Deals</span>
+</a>
+<a class="text-zinc-600 dark:text-zinc-400 flex flex-col items-center justify-center w-full h-20 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="receipt_long">receipt_long</span>
+<span class="text-[10px] font-bold uppercase mt-1">Orders</span>
+</a>
+<a class="text-zinc-600 dark:text-zinc-400 flex flex-col items-center justify-center w-full h-20 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="history">history</span>
+<span class="text-[10px] font-bold uppercase mt-1">History</span>
+</a>
+<div class="mt-auto w-full">
+<a class="text-zinc-600 dark:text-zinc-400 flex flex-col items-center justify-center w-full h-20 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="sync">sync</span>
+<span class="text-[10px] font-bold uppercase mt-1">Sync</span>
+</a>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-[100px] mt-20 h-[calc(100vh-80px)] flex bg-zinc-100">
+<!-- Left Section: Product Grid (8 Columns equivalent) -->
+<div class="flex-grow p-6 flex flex-col gap-6 overflow-hidden">
+<div class="flex justify-between items-center">
+<div class="flex gap-4">
+<button class="px-8 h-12 bg-white border-2 border-blue-600 text-blue-600 font-bold uppercase text-sm">All Products</button>
+<button class="px-8 h-12 bg-white border-2 border-zinc-200 text-zinc-500 font-bold uppercase text-sm hover:border-zinc-400">Main Course</button>
+<button class="px-8 h-12 bg-white border-2 border-zinc-200 text-zinc-500 font-bold uppercase text-sm hover:border-zinc-400">Beverages</button>
+<button class="px-8 h-12 bg-white border-2 border-zinc-200 text-zinc-500 font-bold uppercase text-sm hover:border-zinc-400">Desserts</button>
+</div>
+<p class="font-body-md text-zinc-500 font-bold uppercase">Select products to bundle</p>
+</div>
+<!-- Product Grid -->
+<div class="grid grid-cols-4 gap-4 overflow-y-auto no-scrollbar pb-24">
+<!-- Product Tile 1 -->
+<div class="bg-white border-2 border-zinc-200 p-4 h-[180px] flex flex-col justify-between cursor-pointer hover:border-blue-600 transition-colors active:bg-zinc-900 active:text-white group">
+<div>
+<p class="font-headline-md uppercase text-zinc-900 group-active:text-white">Classic Burger</p>
+<p class="text-zinc-400 text-xs font-bold uppercase mt-1">Main Course</p>
+</div>
+<div class="flex justify-between items-end">
+<span class="material-symbols-outlined text-zinc-300 group-active:text-blue-400" data-icon="add_circle">add_circle</span>
+<p class="font-numeral-lg text-zinc-900 group-active:text-white">$12.50</p>
+</div>
+</div>
+<!-- Product Tile 2 -->
+<div class="bg-blue-600 border-2 border-blue-600 p-4 h-[180px] flex flex-col justify-between cursor-pointer shadow-lg relative">
+<div class="absolute top-2 right-2">
+<span class="material-symbols-outlined text-white" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<div>
+<p class="font-headline-md uppercase text-white">Large Fries</p>
+<p class="text-blue-200 text-xs font-bold uppercase mt-1">Sides</p>
+</div>
+<div class="flex justify-between items-end">
+<span class="material-symbols-outlined text-blue-200" data-icon="remove_circle">remove_circle</span>
+<p class="font-numeral-lg text-white">$4.00</p>
+</div>
+</div>
+<!-- Product Tile 3 -->
+<div class="bg-white border-2 border-zinc-200 p-4 h-[180px] flex flex-col justify-between cursor-pointer hover:border-blue-600 transition-colors active:bg-zinc-900 active:text-white group">
+<div>
+<p class="font-headline-md uppercase text-zinc-900 group-active:text-white">Vanilla Shake</p>
+<p class="text-zinc-400 text-xs font-bold uppercase mt-1">Beverages</p>
+</div>
+<div class="flex justify-between items-end">
+<span class="material-symbols-outlined text-zinc-300 group-active:text-blue-400" data-icon="add_circle">add_circle</span>
+<p class="font-numeral-lg text-zinc-900 group-active:text-white">$6.25</p>
+</div>
+</div>
+<!-- Product Tile 4 -->
+<div class="bg-white border-2 border-zinc-200 p-4 h-[180px] flex flex-col justify-between cursor-pointer hover:border-blue-600 transition-colors active:bg-zinc-900 active:text-white group">
+<div>
+<p class="font-headline-md uppercase text-zinc-900 group-active:text-white">Double Patty</p>
+<p class="text-zinc-400 text-xs font-bold uppercase mt-1">Main Course</p>
+</div>
+<div class="flex justify-between items-end">
+<span class="material-symbols-outlined text-zinc-300 group-active:text-blue-400" data-icon="add_circle">add_circle</span>
+<p class="font-numeral-lg text-zinc-900 group-active:text-white">$15.00</p>
+</div>
+</div>
+<!-- Product Tile 5 -->
+<div class="bg-white border-2 border-zinc-200 p-4 h-[180px] flex flex-col justify-between cursor-pointer hover:border-blue-600 transition-colors active:bg-zinc-900 active:text-white group">
+<div>
+<p class="font-headline-md uppercase text-zinc-900 group-active:text-white">Onion Rings</p>
+<p class="text-zinc-400 text-xs font-bold uppercase mt-1">Sides</p>
+</div>
+<div class="flex justify-between items-end">
+<span class="material-symbols-outlined text-zinc-300 group-active:text-blue-400" data-icon="add_circle">add_circle</span>
+<p class="font-numeral-lg text-zinc-900 group-active:text-white">$5.50</p>
+</div>
+</div>
+<!-- Product Tile 6 -->
+<div class="bg-blue-600 border-2 border-blue-600 p-4 h-[180px] flex flex-col justify-between cursor-pointer shadow-lg relative">
+<div class="absolute top-2 right-2">
+<span class="material-symbols-outlined text-white" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<div>
+<p class="font-headline-md uppercase text-white">Soft Drink</p>
+<p class="text-blue-200 text-xs font-bold uppercase mt-1">Beverages</p>
+</div>
+<div class="flex justify-between items-end">
+<span class="material-symbols-outlined text-blue-200" data-icon="remove_circle">remove_circle</span>
+<p class="font-numeral-lg text-white">$2.50</p>
+</div>
+</div>
+<!-- Placeholder tiles for visual rhythm -->
+<div class="bg-white/50 border-2 border-dashed border-zinc-300 p-4 h-[180px] flex items-center justify-center">
+<p class="text-zinc-400 font-bold uppercase text-xs">More Products</p>
+</div>
+<div class="bg-white/50 border-2 border-dashed border-zinc-300 p-4 h-[180px] flex items-center justify-center">
+<span class="material-symbols-outlined text-zinc-300" data-icon="add">add</span>
+</div>
+</div>
+</div>
+<!-- Right Section: Order Sidebar / Deal Builder (4 Columns equivalent) -->
+<aside class="w-[480px] bg-white border-l-2 border-zinc-200 flex flex-col h-full">
+<div class="p-6 border-b-2 border-zinc-100 bg-zinc-50">
+<h2 class="font-headline-lg uppercase text-zinc-900 tracking-tight">Create New Deal</h2>
+<p class="text-zinc-500 font-bold uppercase text-xs mt-1">Bundle Configuration</p>
+</div>
+<div class="flex-grow p-6 flex flex-col gap-8 overflow-y-auto no-scrollbar">
+<!-- Deal Name -->
+<div class="space-y-3">
+<label class="block font-label-xl uppercase text-sm">Deal Name</label>
+<input class="w-full bg-zinc-100 border-2 border-zinc-200 h-16 px-4 font-body-lg focus:border-blue-600 focus:ring-0" type="text" value="Lunch Combo Special"/>
+</div>
+<!-- Selected Products List -->
+<div class="space-y-4">
+<label class="block font-label-xl uppercase text-sm">Selected Products</label>
+<div class="space-y-2">
+<!-- Bundle Item 1 -->
+<div class="flex items-center justify-between bg-white border-2 border-zinc-200 h-20 px-6 group hover:border-zinc-400">
+<div class="flex flex-col">
+<p class="font-bold uppercase text-zinc-900">Large Fries</p>
+<p class="text-zinc-400 text-xs">$4.00</p>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center">
+<button class="w-10 h-10 border-2 border-zinc-200 flex items-center justify-center hover:bg-zinc-100"><span class="material-symbols-outlined text-zinc-600" data-icon="remove">remove</span></button>
+<span class="w-12 text-center font-bold text-xl">1</span>
+<button class="w-10 h-10 border-2 border-zinc-200 flex items-center justify-center hover:bg-zinc-100"><span class="material-symbols-outlined text-zinc-600" data-icon="add">add</span></button>
+</div>
+<button class="text-zinc-300 hover:text-error transition-colors">
+<span class="material-symbols-outlined" data-icon="delete">delete</span>
+</button>
+</div>
+</div>
+<!-- Bundle Item 2 -->
+<div class="flex items-center justify-between bg-white border-2 border-zinc-200 h-20 px-6 group hover:border-zinc-400">
+<div class="flex flex-col">
+<p class="font-bold uppercase text-zinc-900">Soft Drink</p>
+<p class="text-zinc-400 text-xs">$2.50</p>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center">
+<button class="w-10 h-10 border-2 border-zinc-200 flex items-center justify-center hover:bg-zinc-100"><span class="material-symbols-outlined text-zinc-600" data-icon="remove">remove</span></button>
+<span class="w-12 text-center font-bold text-xl">1</span>
+<button class="w-10 h-10 border-2 border-zinc-200 flex items-center justify-center hover:bg-zinc-100"><span class="material-symbols-outlined text-zinc-600" data-icon="add">add</span></button>
+</div>
+<button class="text-zinc-300 hover:text-error transition-colors">
+<span class="material-symbols-outlined" data-icon="delete">delete</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Pricing Logic -->
+<div class="grid grid-cols-2 gap-4">
+<div class="space-y-3">
+<label class="block font-label-xl uppercase text-sm">Regular Price</label>
+<div class="w-full bg-zinc-100 border-2 border-zinc-200 h-16 px-4 font-numeral-lg flex items-center text-zinc-400">
+                            $6.50
+                        </div>
+</div>
+<div class="space-y-3">
+<label class="block font-label-xl uppercase text-sm text-blue-600">Deal Price</label>
+<input class="w-full bg-white border-2 border-blue-600 h-16 px-4 font-numeral-lg focus:ring-0 text-blue-600" type="text" value="4.99"/>
+</div>
+</div>
+<!-- Toggle Settings -->
+<div class="flex items-center justify-between h-20 px-4 border-2 border-zinc-200">
+<span class="font-bold uppercase text-sm">Active on Menu</span>
+<div class="w-16 h-8 bg-blue-600 rounded-full relative flex items-center px-1">
+<div class="w-6 h-6 bg-white rounded-full ml-auto"></div>
+</div>
+</div>
+</div>
+<!-- Fixed Bottom Action -->
+<div class="p-6 bg-white border-t-2 border-zinc-100">
+<button class="w-full h-20 bg-blue-600 text-white font-black uppercase text-xl flex items-center justify-center gap-4 hover:bg-blue-700 active:scale-95 transition-all">
+<span>SAVE DEAL</span>
+<span class="material-symbols-outlined" data-icon="done_all">done_all</span>
+</button>
+</div>
+</aside>
+</main>
+</body></html>

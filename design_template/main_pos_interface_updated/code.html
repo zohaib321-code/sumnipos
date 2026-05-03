@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container-highest": "#e1e2ee",
+                    "surface-container-low": "#f2f3ff",
+                    "primary-container": "#0066ff",
+                    "on-background": "#191b24",
+                    "on-tertiary-container": "#fff6f4",
+                    "secondary-fixed": "#6ffbbe",
+                    "on-error": "#ffffff",
+                    "inverse-primary": "#b3c5ff",
+                    "background": "#faf8ff",
+                    "inverse-on-surface": "#eff0fd",
+                    "tertiary-fixed-dim": "#ffb59d",
+                    "tertiary-fixed": "#ffdbd0",
+                    "on-primary": "#ffffff",
+                    "surface-dim": "#d8d9e6",
+                    "on-secondary-fixed-variant": "#005236",
+                    "inverse-surface": "#2e303a",
+                    "surface-container-lowest": "#ffffff",
+                    "outline": "#727687",
+                    "on-secondary-fixed": "#002113",
+                    "on-primary-container": "#f8f7ff",
+                    "tertiary": "#a33200",
+                    "secondary-fixed-dim": "#4edea3",
+                    "primary-fixed-dim": "#b3c5ff",
+                    "surface-bright": "#faf8ff",
+                    "on-tertiary-fixed": "#390c00",
+                    "surface-container-high": "#e6e7f4",
+                    "on-tertiary": "#ffffff",
+                    "on-primary-fixed-variant": "#003fa4",
+                    "surface-tint": "#0054d6",
+                    "primary": "#0050cb",
+                    "on-primary-fixed": "#001849",
+                    "on-secondary": "#ffffff",
+                    "surface-variant": "#e1e2ee",
+                    "secondary-container": "#6cf8bb",
+                    "on-surface": "#191b24",
+                    "on-tertiary-fixed-variant": "#832600",
+                    "on-error-container": "#93000a",
+                    "surface": "#faf8ff",
+                    "on-surface-variant": "#424656",
+                    "on-secondary-container": "#00714d",
+                    "tertiary-container": "#cc4204",
+                    "surface-container": "#ecedfa",
+                    "error-container": "#ffdad6",
+                    "primary-fixed": "#dae1ff",
+                    "outline-variant": "#c2c6d8",
+                    "secondary": "#006c49",
+                    "error": "#ba1a1a"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "touch-target-min": "80px",
+                    "tile-padding": "20px",
+                    "gutter": "12px",
+                    "margin-screen": "24px",
+                    "stack-gap": "16px"
+            },
+            "fontFamily": {
+                    "body-md": ["Inter"],
+                    "display": ["Inter"],
+                    "numeral-lg": ["Inter"],
+                    "label-xl": ["Inter"],
+                    "headline-md": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "headline-lg": ["Inter"]
+            },
+            "fontSize": {
+                    "body-md": ["18px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                    "display": ["48px", {"lineHeight": "1.1", "fontWeight": "700"}],
+                    "numeral-lg": ["36px", {"lineHeight": "1.0", "fontWeight": "700"}],
+                    "label-xl": ["22px", {"lineHeight": "1.0", "letterSpacing": "0.02em", "fontWeight": "700"}],
+                    "headline-md": ["24px", {"lineHeight": "1.2", "fontWeight": "600"}],
+                    "body-lg": ["20px", {"lineHeight": "1.5", "fontWeight": "500"}],
+                    "headline-lg": ["32px", {"lineHeight": "1.2", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .active-invert:active {
+            filter: invert(1);
+            transition: filter 75ms ease;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface overflow-hidden h-screen flex flex-col">
+<!-- Top App Bar -->
+<header class="bg-zinc-50 dark:bg-zinc-950 flex justify-between items-center w-full px-6 h-20 z-50 border-b-2 border-zinc-200 dark:border-zinc-800 shrink-0">
+<div class="flex items-center gap-4">
+<span class="text-2xl font-black text-zinc-900 dark:text-zinc-50 tracking-tighter">VELOCITY POS</span>
+<div class="h-8 w-px bg-zinc-200 dark:border-zinc-800"></div>
+<span class="text-zinc-500 font-inter font-bold tracking-tight">TERMINAL 04</span>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2 px-4 h-12 bg-zinc-100 dark:bg-zinc-900 rounded-none border-2 border-zinc-200 dark:border-zinc-800">
+<span class="material-symbols-outlined text-zinc-500" data-icon="search">search</span>
+<input class="bg-transparent border-none focus:ring-0 font-bold text-sm uppercase tracking-widest placeholder-zinc-400" placeholder="Search products..." type="text"/>
+</div>
+<button class="w-12 h-12 flex items-center justify-center hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors active:bg-zinc-900 active:text-white">
+<span class="material-symbols-outlined" data-icon="wifi">wifi</span>
+</button>
+<button class="w-12 h-12 flex items-center justify-center hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors active:bg-zinc-900 active:text-white">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+</button>
+<button class="w-12 h-12 flex items-center justify-center hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors active:bg-zinc-900 active:text-white">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+</div>
+</header>
+<main class="flex flex-1 overflow-hidden">
+<!-- Left Sidebar: Categories -->
+<nav class="bg-zinc-100 dark:bg-zinc-900 w-[12%] flex flex-col pt-4 overflow-y-auto border-r-2 border-zinc-200 dark:border-zinc-800 shrink-0">
+<div class="px-4 mb-4">
+<span class="font-inter text-xs font-bold uppercase tracking-widest text-zinc-500">CATEGORIES</span>
+</div>
+<!-- Active Tab: Meals -->
+<button class="bg-blue-600 text-white flex flex-col items-center justify-center gap-2 h-24 m-2 rounded-none border-2 border-blue-700 active:invert duration-75">
+<span class="material-symbols-outlined" data-icon="restaurant">restaurant</span>
+<span class="font-inter text-xs font-bold uppercase tracking-widest">Meals</span>
+</button>
+<button class="bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 flex flex-col items-center justify-center gap-2 h-24 m-2 rounded-none border-2 border-zinc-200 dark:border-zinc-700 hover:border-blue-600 active:invert duration-75">
+<span class="material-symbols-outlined" data-icon="sell">sell</span>
+<span class="font-inter text-xs font-bold uppercase tracking-widest">Deals</span>
+</button>
+<button class="bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 flex flex-col items-center justify-center gap-2 h-24 m-2 rounded-none border-2 border-zinc-200 dark:border-zinc-700 hover:border-blue-600 active:invert duration-75">
+<span class="material-symbols-outlined" data-icon="local_drink">local_drink</span>
+<span class="font-inter text-xs font-bold uppercase tracking-widest">Drinks</span>
+</button>
+<button class="bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 flex flex-col items-center justify-center gap-2 h-24 m-2 rounded-none border-2 border-zinc-200 dark:border-zinc-700 hover:border-blue-600 active:invert duration-75">
+<span class="material-symbols-outlined" data-icon="fastfood">fastfood</span>
+<span class="font-inter text-xs font-bold uppercase tracking-widest">Snacks</span>
+</button>
+<button class="bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 flex flex-col items-center justify-center gap-2 h-24 m-2 rounded-none border-2 border-zinc-200 dark:border-zinc-700 hover:border-blue-600 active:invert duration-75">
+<span class="material-symbols-outlined" data-icon="icecream">icecream</span>
+<span class="font-inter text-xs font-bold uppercase tracking-widest">Desserts</span>
+</button>
+</nav>
+<!-- Center: Product Grid -->
+<section class="flex-1 bg-surface-container-lowest p-6 overflow-y-auto">
+<div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+<!-- Product Tile -->
+<button class="relative bg-white border-2 border-zinc-200 h-48 flex flex-col text-left group active:bg-zinc-900 active:text-white transition-all">
+<div class="w-full h-24 bg-zinc-50 overflow-hidden border-b border-zinc-100">
+<img class="w-full h-full object-cover grayscale-[0.5] group-hover:grayscale-0 transition-all" data-alt="high contrast studio shot of a gourmet double cheeseburger with fresh lettuce and tomato on a toasted brioche bun" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAPSLSNtjOtRtll4JNRN86f7e21GjnBTiAPjfj50JoW2ZDEEtOm2i8VA4rqgucBd_aSdUYiqqIWXxXwRF_TE2Q13jsge29hhRW-_mQrI-40iLeH7GeX9T1UXEMJLjtHa9AnUxEEKxbs2GR79UaCA--ycpES-9Yk8Swb6FInU9fjTXcfuh7atXUpW4_yX1xWQn5hIAfKvLvTJnJCNBF5BJEv-H20YyagzxxDK_7iC71NEzIKsmHENe7haqQpDW123AhLOkKWD-nTzjgY"/>
+</div>
+<div class="p-4 flex flex-col justify-between flex-1">
+<span class="font-headline-md text-zinc-900 group-active:text-white">Double Smash</span>
+<span class="self-end font-numeral-lg text-primary group-active:text-white">$14.50</span>
+</div>
+</button>
+<button class="relative bg-white border-2 border-zinc-200 h-48 flex flex-col text-left group active:bg-zinc-900 active:text-white transition-all">
+<div class="w-full h-24 bg-zinc-50 overflow-hidden border-b border-zinc-100">
+<img class="w-full h-full object-cover grayscale-[0.5] group-hover:grayscale-0 transition-all" data-alt="top view of a classic pepperoni pizza with melted mozzarella and fresh basil on a dark stone background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBuhdzRqT12dzmC8nOnFaKfric_veq-Axlab96SiumhGpNrduKFsJhcU4f6HPYamGbDkIXj3VsALuI26n1nNGIfIVMHq63K23gQzOjszlINV0QG1jbTrjiX2bBW5oGTAdiTJkIFcTPUMoOzl7-hOPzS3Yb282hVUm3oiZyyQZXH9q0kPx7UxsrlhXT--2xS9hLR0MQFjDNHujnJtKKxK3xYGVwiyZh06yi-5fVTW5xxbxX_FnB9yPGRCEu891ZIMqlBqNiPrvCiZrKx"/>
+</div>
+<div class="p-4 flex flex-col justify-between flex-1">
+<span class="font-headline-md text-zinc-900 group-active:text-white">Classic Pep</span>
+<span class="self-end font-numeral-lg text-primary group-active:text-white">$18.00</span>
+</div>
+</button>
+<button class="relative bg-white border-2 border-zinc-200 h-48 flex flex-col text-left group active:bg-zinc-900 active:text-white transition-all">
+<div class="w-full h-24 bg-zinc-50 overflow-hidden border-b border-zinc-100">
+<img class="w-full h-full object-cover grayscale-[0.5] group-hover:grayscale-0 transition-all" data-alt="vibrant healthy Buddha bowl with quinoa, sliced avocado, chickpeas, and fresh greens in a ceramic bowl" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDT1T2ODQ_BkIAz3qBVvTRRChf4vyzvkTjWuM18dl9PlCjdDIzJtyPRlpHX1oLS_8Imef9cOuw8uwAETiw1_ZVjxRHiTlWr6VMFnDAvuTHF4qpeEFaQbtHLBC854kZsF1qiO2v4nreyatXHmCPd1VlzVdbzwnaqBL7RS_c2tIJ0Z3HbhGdnrGfio7QHZdZE5n6yX-Jj6w2ABXYfPDyncxnzW3DLILisIRQKlxSlovrGQUXiI5o3Dr7Pq59Iik0dCqeLyx_HDGmhflap"/>
+</div>
+<div class="p-4 flex flex-col justify-between flex-1">
+<span class="font-headline-md text-zinc-900 group-active:text-white">Harvest Bowl</span>
+<span class="self-end font-numeral-lg text-primary group-active:text-white">$12.95</span>
+</div>
+</button>
+<button class="relative bg-white border-2 border-zinc-200 h-48 flex flex-col text-left group active:bg-zinc-900 active:text-white transition-all">
+<div class="w-full h-24 bg-zinc-50 overflow-hidden border-b border-zinc-100">
+<img class="w-full h-full object-cover grayscale-[0.5] group-hover:grayscale-0 transition-all" data-alt="crispy fried chicken sandwich with spicy mayo and pickles on a glossy bun with dramatic lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCoqKj5kPVGMwjVs0N_O0OyZ2K34mHhlGhyZd119aStAxw4Ge3WUDpNz9FzRrexZ-xlrOarPjzyJ0bVpei5IXEpzsdJUv8_pT_BMilfltn-W4E9mhp16UzGWMlTwCwvxFKrXIeAnkM4qzjAeUcToaC8GGarkwCBf-yDgkykXN54EP8gDbdnk6SXhfgGG9anvDfMfVrK1IhX557699W5dOUvORdwkKolz2CYo2WSg6BcJv1RqOPUrrG8J71sRZfuu_uv5xWijznYfNJp"/>
+</div>
+<div class="p-4 flex flex-col justify-between flex-1">
+<span class="font-headline-md text-zinc-900 group-active:text-white">Spicy Bird</span>
+<span class="self-end font-numeral-lg text-primary group-active:text-white">$11.50</span>
+</div>
+</button>
+<button class="relative bg-white border-2 border-zinc-200 h-48 flex flex-col text-left group active:bg-zinc-900 active:text-white transition-all">
+<div class="w-full h-24 bg-zinc-50 overflow-hidden border-b border-zinc-100">
+<img class="w-full h-full object-cover grayscale-[0.5] group-hover:grayscale-0 transition-all" data-alt="fresh salmon sashimi platter with wasabi and ginger served on a minimalist black slate plate" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCy7UYfVjD2gON-GU4SSrwhar40UXxjT8X2SF87yMWeFxRKdL3THeg6lXb5AyBjweMUR8wxcGTqiWztQ_cgGVuk8Xd9bg_smdIrlB9IcJPkJl0wVB6b70__o10VJO9O-2AjLLk92vhbaY_-lGXmw8nZ7oh-V2vBaooPtlNunKz_mBpMc7b2GEL4JaAY3nyY0WO2Mjzx7Csm0drmuRA8Qbdoh0AzCQAqrvqEs9y-8es--n3dFpBKZkZhJxvlR_WS6Vv1eP4R_MBPM13G"/>
+</div>
+<div class="p-4 flex flex-col justify-between flex-1">
+<span class="font-headline-md text-zinc-900 group-active:text-white">Salmon Poke</span>
+<span class="self-end font-numeral-lg text-primary group-active:text-white">$16.25</span>
+</div>
+</button>
+<button class="relative bg-white border-2 border-zinc-200 h-48 flex flex-col text-left group active:bg-zinc-900 active:text-white transition-all">
+<div class="w-full h-24 bg-zinc-50 overflow-hidden border-b border-zinc-100">
+<img class="w-full h-full object-cover grayscale-[0.5] group-hover:grayscale-0 transition-all" data-alt="stack of fluffy pancakes topped with fresh blueberries and dripping maple syrup against a neutral background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCrBFcaBbSexnoWxiaokhrcF6jI7utn9PJ2h6FyZfN3_ddv2G8k-bo_YV2VPoUoQsLWeKqot3JjMK6C03PkhzTLYBAjj1xu11rIvAakc_OzUY9Dfe6Vk4Un1ILwFtB8cHo8XXcsNXjfEUWrWVoRzDVyw7LnmaT6cWlwmFNWb-1VM4PQObOK3drYr4y42mGueoXb1SKjyNDhTVAXQnO4BMLQ2-B2YU-s8PaHlyoFINyStErMYoGkM4tc2ofcUEtPrJ87n6gdLqe0bKAO"/>
+</div>
+<div class="p-4 flex flex-col justify-between flex-1">
+<span class="font-headline-md text-zinc-900 group-active:text-white">Blueberry Stack</span>
+<span class="self-end font-numeral-lg text-primary group-active:text-white">$10.00</span>
+</div>
+</button>
+<button class="relative bg-white border-2 border-zinc-200 h-48 flex flex-col text-left group active:bg-zinc-900 active:text-white transition-all">
+<div class="w-full h-24 bg-zinc-50 overflow-hidden border-b border-zinc-100">
+<img class="w-full h-full object-cover grayscale-[0.5] group-hover:grayscale-0 transition-all" data-alt="bowl of steaming spaghetti carbonara with black pepper and grated parmesan cheese with soft window light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCx6LbbSsrEWbsQMJs54QZUf2M-_C7jy01_aCzTSVlnYvdKUiey7aKz231qcwGjgXS0daP07qVatOBsDDC_DOE8hTGaSVUQHQmkdZaNoSjtCsaN6KYMu3JAC8TicRFKKV2YGrFYE5aXplF9mi-6QKIoG4YJQcTvE96QoTu6eL90qLumu9R4yKz2w4-A1vCOx_1NKP2Jno-PXYKjrBF58sow_BxwN9k-ZWv_Wj6QCrrqanYRcZesigFVGBAWEeXNnvCWfmYpEJXbhsTo"/>
+</div>
+<div class="p-4 flex flex-col justify-between flex-1">
+<span class="font-headline-md text-zinc-900 group-active:text-white">Carbonara</span>
+<span class="self-end font-numeral-lg text-primary group-active:text-white">$15.75</span>
+</div>
+</button>
+<button class="relative bg-white border-2 border-zinc-200 h-48 flex flex-col text-left group active:bg-zinc-900 active:text-white transition-all">
+<div class="w-full h-24 bg-zinc-50 overflow-hidden border-b border-zinc-100">
+<img class="w-full h-full object-cover grayscale-[0.5] group-hover:grayscale-0 transition-all" data-alt="vibrant garden salad with mixed greens, cherry tomatoes, and cucumber in a simple white bowl" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD4dnZqDQQvRWDkOEmSx4iB0jRQwU72VMJ9cnfwQRH1k-XGkjMAUROXBagvxZRnY9l_uoKoD29DfeL01fdo-ryiEVYjnL7T1c_BqKoVvkXDGwswfnLZNPgI3QRTy76Nb4FvDuTba8tFR0RdMpzj06ikSlkeOEOwFFK5ZFxn6ULlbHlWcqzyIbdPe7i2zmnggZeS45VAomjryzavVTZYQpqa7RYHZInazG5TXGkmonVXIGxyLACpalcbxlQXEAQeHfr68Ofe18zE3cXF"/>
+</div>
+<div class="p-4 flex flex-col justify-between flex-1">
+<span class="font-headline-md text-zinc-900 group-active:text-white">Garden Fresh</span>
+<span class="self-end font-numeral-lg text-primary group-active:text-white">$8.50</span>
+</div>
+</button>
+</div>
+</section>
+<!-- Right Sidebar: Cart -->
+<aside class="w-[30%] bg-white border-l-2 border-zinc-200 dark:border-zinc-800 flex flex-col">
+<div class="p-6 border-b-2 border-zinc-100 flex justify-between items-center">
+<h2 class="font-headline-lg text-zinc-900">Current Order</h2>
+<button class="text-error font-bold uppercase tracking-widest text-xs py-2 px-4 border-2 border-error/20 hover:bg-error/5 active:bg-error active:text-white transition-colors">Clear All</button>
+</div>
+<!-- Cart Items -->
+<div class="flex-1 overflow-y-auto">
+<!-- Cart Row -->
+<div class="h-24 flex items-center px-6 border-b border-zinc-100 group">
+<div class="flex-1">
+<h4 class="font-label-xl text-zinc-900">Double Smash</h4>
+<span class="text-primary font-bold">$14.50</span>
+</div>
+<div class="flex items-center bg-zinc-50 border-2 border-zinc-200">
+<button class="w-12 h-12 flex items-center justify-center text-zinc-400 hover:text-zinc-900 active:bg-zinc-200 transition-colors">
+<span class="material-symbols-outlined">remove</span>
+</button>
+<span class="w-10 text-center font-numeral-lg text-xl">1</span>
+<button class="w-12 h-12 flex items-center justify-center text-zinc-400 hover:text-zinc-900 active:bg-zinc-200 transition-colors">
+<span class="material-symbols-outlined">add</span>
+</button>
+</div>
+<button class="ml-4 w-12 h-12 flex items-center justify-center text-zinc-300 hover:text-error transition-colors">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<!-- Selected Cart Row -->
+<div class="h-24 flex items-center px-6 border-b border-zinc-100 bg-blue-50/30 relative">
+<div class="absolute inset-0 border-l-4 border-primary"></div>
+<div class="flex-1">
+<h4 class="font-label-xl text-zinc-900">Spicy Bird</h4>
+<span class="text-primary font-bold">$11.50</span>
+</div>
+<div class="flex items-center bg-white border-2 border-primary">
+<button class="w-12 h-12 flex items-center justify-center text-primary active:bg-blue-100 transition-colors">
+<span class="material-symbols-outlined">remove</span>
+</button>
+<span class="w-10 text-center font-numeral-lg text-xl">2</span>
+<button class="w-12 h-12 flex items-center justify-center text-primary active:bg-blue-100 transition-colors">
+<span class="material-symbols-outlined">add</span>
+</button>
+</div>
+<button class="ml-4 w-12 h-12 flex items-center justify-center text-zinc-300 hover:text-error transition-colors">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+</div>
+<!-- Totals & Checkout -->
+<div class="p-6 bg-zinc-50 border-t-2 border-zinc-200">
+<div class="space-y-2 mb-6">
+<div class="flex justify-between text-zinc-500 font-bold uppercase text-xs tracking-widest">
+<span>Subtotal</span>
+<span>$37.50</span>
+</div>
+<div class="flex justify-between text-zinc-500 font-bold uppercase text-xs tracking-widest">
+<span>Tax (8%)</span>
+<span>$3.00</span>
+</div>
+<div class="flex justify-between items-center pt-2">
+<span class="font-headline-lg text-zinc-900">TOTAL</span>
+<span class="font-display text-primary">$40.50</span>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<button class="h-20 bg-white border-2 border-zinc-300 font-bold uppercase tracking-widest active:bg-zinc-900 active:text-white transition-colors">
+                        Save Order
+                    </button>
+<button class="h-20 bg-zinc-900 text-white font-bold uppercase tracking-widest active:bg-black transition-colors">
+                        Discount
+                    </button>
+</div>
+<button class="w-full mt-4 h-24 bg-primary text-white flex items-center justify-center gap-4 active:bg-primary-fixed-dim transition-colors group">
+<span class="font-display text-2xl uppercase tracking-tighter">Pay Now</span>
+<span class="material-symbols-outlined text-4xl group-hover:translate-x-2 transition-transform">arrow_forward</span>
+</button>
+</div>
+</aside>
+</main>
+<!-- Modal Trigger Area (Invisible or Hint) -->
+<div class="fixed bottom-6 left-6 z-50">
+<button class="w-16 h-16 bg-zinc-900 text-white rounded-none flex items-center justify-center active:scale-95 transition-transform shadow-lg">
+<span class="material-symbols-outlined">menu</span>
+</button>
+</div>
+</body></html>

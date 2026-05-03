@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-container": "#f8f7ff",
+                        "secondary": "#006c49",
+                        "inverse-primary": "#b3c5ff",
+                        "on-primary-fixed-variant": "#003fa4",
+                        "on-primary-fixed": "#001849",
+                        "surface-dim": "#d8d9e6",
+                        "tertiary": "#a33200",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary-container": "#cc4204",
+                        "surface-container-low": "#f2f3ff",
+                        "surface": "#faf8ff",
+                        "primary-fixed": "#dae1ff",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary-fixed": "#390c00",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary-fixed-variant": "#005236",
+                        "secondary-fixed-dim": "#4edea3",
+                        "inverse-on-surface": "#eff0fd",
+                        "on-tertiary-fixed-variant": "#832600",
+                        "on-surface": "#191b24",
+                        "surface-container": "#ecedfa",
+                        "surface-container-highest": "#e1e2ee",
+                        "on-background": "#191b24",
+                        "secondary-fixed": "#6ffbbe",
+                        "error-container": "#ffdad6",
+                        "surface-variant": "#e1e2ee",
+                        "on-surface-variant": "#424656",
+                        "on-secondary-container": "#00714d",
+                        "primary-container": "#0066ff",
+                        "primary": "#0050cb",
+                        "on-error-container": "#93000a",
+                        "primary-fixed-dim": "#b3c5ff",
+                        "tertiary-fixed-dim": "#ffb59d",
+                        "on-primary": "#ffffff",
+                        "surface-bright": "#faf8ff",
+                        "on-tertiary-container": "#fff6f4",
+                        "tertiary-fixed": "#ffdbd0",
+                        "on-secondary-fixed": "#002113",
+                        "surface-tint": "#0054d6",
+                        "inverse-surface": "#2e303a",
+                        "on-error": "#ffffff",
+                        "outline": "#727687",
+                        "background": "#faf8ff",
+                        "outline-variant": "#c2c6d8",
+                        "error": "#ba1a1a",
+                        "surface-container-high": "#e6e7f4",
+                        "secondary-container": "#6cf8bb"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-gap": "16px",
+                        "margin-screen": "24px",
+                        "tile-padding": "20px",
+                        "touch-target-min": "80px",
+                        "gutter": "12px"
+                    },
+                    "fontFamily": {
+                        "display": ["Inter"],
+                        "numeral-lg": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "label-xl": ["Inter"],
+                        "headline-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "display": ["48px", {"lineHeight": "1.1", "fontWeight": "700"}],
+                        "numeral-lg": ["36px", {"lineHeight": "1.0", "fontWeight": "700"}],
+                        "headline-lg": ["32px", {"lineHeight": "1.2", "fontWeight": "600"}],
+                        "body-md": ["18px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "body-lg": ["20px", {"lineHeight": "1.5", "fontWeight": "500"}],
+                        "label-xl": ["22px", {"lineHeight": "1.0", "letterSpacing": "0.02em", "fontWeight": "700"}],
+                        "headline-md": ["24px", {"lineHeight": "1.2", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #c2c6d8; border-radius: 4px; }
+    </style>
+</head>
+<body class="bg-[#F4F4F5] font-body-md text-on-background selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 right-0 z-50 bg-zinc-100 border-b-2 border-zinc-200 flex justify-between items-center w-full px-6 h-20 shadow-none">
+<div class="flex items-center gap-8 h-full">
+<span class="text-2xl font-black text-blue-600 uppercase tracking-tight font-['Inter']">VELOCITY POS</span>
+</div>
+<div class="flex items-center gap-2">
+<button class="w-12 h-12 flex items-center justify-center rounded-lg hover:bg-zinc-200 transition-colors">
+<span class="material-symbols-outlined text-zinc-600" data-icon="wifi">wifi</span>
+</button>
+<button class="w-12 h-12 flex items-center justify-center rounded-lg hover:bg-zinc-200 transition-colors">
+<span class="material-symbols-outlined text-zinc-600" data-icon="account_circle">account_circle</span>
+</button>
+<button class="w-12 h-12 flex items-center justify-center rounded-lg hover:bg-zinc-200 transition-colors">
+<span class="material-symbols-outlined text-zinc-600" data-icon="settings">settings</span>
+</button>
+</div>
+</header>
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-20 bottom-0 flex flex-col items-center z-40 bg-white border-r-2 border-zinc-200 w-[100px] shadow-none">
+<div class="py-6 flex flex-col items-center gap-1 w-full border-b border-zinc-100">
+<span class="text-blue-600 font-black text-xs font-['Inter'] uppercase tracking-widest">OPERATOR</span>
+<span class="text-[10px] text-zinc-400 font-bold uppercase">Station 01</span>
+</div>
+<div class="flex flex-col w-full">
+<button class="text-zinc-600 flex flex-col items-center justify-center w-full h-20 hover:bg-zinc-100 active:invert duration-75">
+<span class="material-symbols-outlined text-2xl" data-icon="grid_view">grid_view</span>
+<span class="text-[10px] font-bold uppercase mt-1">Categories</span>
+</button>
+<button class="text-zinc-600 flex flex-col items-center justify-center w-full h-20 hover:bg-zinc-100 active:invert duration-75">
+<span class="material-symbols-outlined text-2xl" data-icon="sell">sell</span>
+<span class="text-[10px] font-bold uppercase mt-1">Deals</span>
+</button>
+<button class="text-zinc-600 flex flex-col items-center justify-center w-full h-20 hover:bg-zinc-100 active:invert duration-75">
+<span class="material-symbols-outlined text-2xl" data-icon="receipt_long">receipt_long</span>
+<span class="text-[10px] font-bold uppercase mt-1">Orders</span>
+</button>
+<button class="bg-blue-600 text-white flex flex-col items-center justify-center w-full h-20 active:invert duration-75">
+<span class="material-symbols-outlined text-2xl" data-icon="inventory_2">inventory_2</span>
+<span class="text-[10px] font-bold uppercase mt-1">Inventory</span>
+</button>
+<button class="text-zinc-600 flex flex-col items-center justify-center w-full h-20 hover:bg-zinc-100 active:invert duration-75">
+<span class="material-symbols-outlined text-2xl" data-icon="history">history</span>
+<span class="text-[10px] font-bold uppercase mt-1">History</span>
+</button>
+<button class="text-zinc-600 flex flex-col items-center justify-center w-full h-20 hover:bg-zinc-100 active:invert duration-75">
+<span class="material-symbols-outlined text-2xl" data-icon="sync">sync</span>
+<span class="text-[10px] font-bold uppercase mt-1">Sync</span>
+</button>
+</div>
+</aside>
+<!-- Main Canvas -->
+<main class="ml-[100px] mt-20 p-margin-screen min-h-screen">
+<div class="max-w-7xl mx-auto">
+<!-- Header Section -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
+<div>
+<h1 class="font-headline-lg text-on-surface mb-2">Inventory Management</h1>
+<p class="font-body-md text-on-surface-variant">Manage your stock levels, monitor low alerts, and batch update counts.</p>
+</div>
+<div class="flex gap-4">
+<div class="bg-white border-2 border-zinc-200 h-16 px-4 flex items-center gap-3 min-w-[300px]">
+<span class="material-symbols-outlined text-zinc-400" data-icon="search">search</span>
+<input class="bg-transparent border-none focus:ring-0 w-full font-label-xl text-sm uppercase tracking-wider" placeholder="SEARCH PRODUCT OR SKU..." type="text"/>
+</div>
+<button class="bg-primary px-8 h-16 text-white font-label-xl uppercase flex items-center justify-center hover:bg-primary-container active:scale-95 transition-all">
+<span class="material-symbols-outlined mr-2" data-icon="add">add</span>
+                        New Product
+                    </button>
+</div>
+</div>
+<!-- Stats Bar -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-gutter mb-8">
+<div class="bg-white border-2 border-zinc-200 p-6 flex items-center justify-between">
+<div>
+<p class="text-[12px] font-black uppercase text-zinc-400 mb-1">Total SKU</p>
+<p class="font-numeral-lg text-on-surface">1,284</p>
+</div>
+<div class="w-12 h-12 bg-zinc-50 flex items-center justify-center">
+<span class="material-symbols-outlined text-zinc-400" data-icon="inventory_2">inventory_2</span>
+</div>
+</div>
+<div class="bg-white border-2 border-zinc-200 p-6 flex items-center justify-between">
+<div>
+<p class="text-[12px] font-black uppercase text-zinc-400 mb-1">Low Stock</p>
+<p class="font-numeral-lg text-tertiary">14</p>
+</div>
+<div class="w-12 h-12 bg-tertiary-fixed flex items-center justify-center">
+<span class="material-symbols-outlined text-tertiary" data-icon="warning">warning</span>
+</div>
+</div>
+<div class="bg-white border-2 border-zinc-200 p-6 flex items-center justify-between">
+<div>
+<p class="text-[12px] font-black uppercase text-zinc-400 mb-1">Out of Stock</p>
+<p class="font-numeral-lg text-error">3</p>
+</div>
+<div class="w-12 h-12 bg-error-container flex items-center justify-center">
+<span class="material-symbols-outlined text-error" data-icon="error">error</span>
+</div>
+</div>
+<div class="bg-white border-2 border-zinc-200 p-6 flex items-center justify-between">
+<div>
+<p class="text-[12px] font-black uppercase text-zinc-400 mb-1">Sync Status</p>
+<p class="font-numeral-lg text-secondary">OK</p>
+</div>
+<div class="w-12 h-12 bg-secondary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary" data-icon="cloud_done">cloud_done</span>
+</div>
+</div>
+</div>
+<!-- Product List Table -->
+<div class="bg-white border-2 border-zinc-200 overflow-hidden">
+<div class="grid grid-cols-12 bg-zinc-100 border-b-2 border-zinc-200 p-4 font-label-xl text-[12px] uppercase text-zinc-500">
+<div class="col-span-1">Preview</div>
+<div class="col-span-4">Product Details</div>
+<div class="col-span-2 text-center">Category</div>
+<div class="col-span-2 text-center">Quantity</div>
+<div class="col-span-3 text-right pr-4">Actions</div>
+</div>
+<!-- Product Items -->
+<div class="divide-y-2 divide-zinc-100">
+<!-- Item 1 -->
+<div class="grid grid-cols-12 items-center p-4 hover:bg-zinc-50 transition-colors h-[touch-target-min]">
+<div class="col-span-1">
+<div class="w-16 h-16 bg-zinc-100 overflow-hidden border-2 border-zinc-200">
+<img class="w-full h-full object-cover" data-alt="vibrant red athletic running shoe with white sole on a clean grey background studio lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBG06pGhCxZeWARImXN6ix4obx4p4FkL0jzz4JgxyKF5xXtUiafJRI1Q4IxRxtber3pveU71yrFqwZRjYSHhlaBe_DkA1-6SQYHHvBfRUIdA1NtC6QgO_oCNgya9QXLnLRVbHdeNOsI3gUCWSCH4OvavsbwW4FmL3cfqZ_AbbiJCz-wL02cbwdCo7CY6VDb0N6JCHMW4yO_Wox_iGgwP1CPm7nmbID9vnDGikoM3z8xLFbcNjQ9HwEBUUCjjWAFXE2EHHuN8iIEsOuV"/>
+</div>
+</div>
+<div class="col-span-4 px-4">
+<p class="font-body-lg text-on-surface">Zoom Runner Elite X</p>
+<p class="text-[12px] text-zinc-400 font-bold">SKU: SHO-ZR-2024-RD</p>
+</div>
+<div class="col-span-2 text-center">
+<span class="px-3 py-1 bg-zinc-100 text-[10px] font-black uppercase border border-zinc-200">Footwear</span>
+</div>
+<div class="col-span-2 flex justify-center items-center gap-4">
+<button class="w-10 h-10 border-2 border-zinc-200 flex items-center justify-center hover:bg-zinc-200 active:bg-primary active:text-white transition-all">
+<span class="material-symbols-outlined" data-icon="remove">remove</span>
+</button>
+<span class="font-numeral-lg text-2xl w-16 text-center">42</span>
+<button class="w-10 h-10 border-2 border-zinc-200 flex items-center justify-center hover:bg-zinc-200 active:bg-primary active:text-white transition-all">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+</button>
+</div>
+<div class="col-span-3 flex justify-end gap-2 pr-4">
+<button class="bg-primary px-6 h-12 text-white font-label-xl text-xs uppercase hover:bg-primary-container active:invert duration-75">Update</button>
+<button class="w-12 h-12 border-2 border-zinc-200 flex items-center justify-center hover:bg-zinc-100">
+<span class="material-symbols-outlined text-zinc-400" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+</div>
+<!-- Item 2 (Low Stock) -->
+<div class="grid grid-cols-12 items-center p-4 hover:bg-zinc-50 transition-colors h-[touch-target-min]">
+<div class="col-span-1">
+<div class="w-16 h-16 bg-zinc-100 overflow-hidden border-2 border-zinc-200">
+<img class="w-full h-full object-cover" data-alt="minimalist white smartwatch with light grey band on a neutral stone background soft overhead light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDiV5l-Z0kKoTuYLmUGvTkSGy33SSz0A9B9yYoyIKhSzfoXQ-v5HaNHXGK0H54Qap4EMDRsoofVCHN6mxjKTldqKU87TmmPSpQN2htsJ5Ypv2T-yAxXhInqzEHEdI03FOx7Hgs6i8ShIivogGTuWrpxA0VlH94G0gbi_ISfB6LxdA2eJzuS6BRFcY0pHFxxEhYv01A-xSJ8PnyXWC29Y-OFi7RCcHXS1WmH1xnLWBfeqPQVODa1AhHhhzfQPyghZuWkCiULAIOpbcfX"/>
+</div>
+</div>
+<div class="col-span-4 px-4">
+<p class="font-body-lg text-on-surface">ProSeries Smartwatch 5</p>
+<p class="text-[12px] text-tertiary font-bold">SKU: ACC-PS5-WHT</p>
+</div>
+<div class="col-span-2 text-center">
+<span class="px-3 py-1 bg-zinc-100 text-[10px] font-black uppercase border border-zinc-200">Electronics</span>
+</div>
+<div class="col-span-2 flex justify-center items-center gap-4">
+<button class="w-10 h-10 border-2 border-zinc-200 flex items-center justify-center hover:bg-zinc-200 active:bg-primary active:text-white transition-all">
+<span class="material-symbols-outlined" data-icon="remove">remove</span>
+</button>
+<span class="font-numeral-lg text-2xl w-16 text-center text-tertiary">08</span>
+<button class="w-10 h-10 border-2 border-zinc-200 flex items-center justify-center hover:bg-zinc-200 active:bg-primary active:text-white transition-all">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+</button>
+</div>
+<div class="col-span-3 flex justify-end gap-2 pr-4">
+<button class="bg-primary px-6 h-12 text-white font-label-xl text-xs uppercase hover:bg-primary-container active:invert duration-75">Update</button>
+<button class="w-12 h-12 border-2 border-zinc-200 flex items-center justify-center hover:bg-zinc-100">
+<span class="material-symbols-outlined text-zinc-400" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+</div>
+<!-- Item 3 -->
+<div class="grid grid-cols-12 items-center p-4 hover:bg-zinc-50 transition-colors h-[touch-target-min]">
+<div class="col-span-1">
+<div class="w-16 h-16 bg-zinc-100 overflow-hidden border-2 border-zinc-200">
+<img class="w-full h-full object-cover" data-alt="professional black over-ear studio headphones resting on a dark wood surface dramatic low key lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB-AORxC057j2bRGhsh1pD4QzBSszzCOfRUEDWxtFXqlevYmhJ4GIJrExnAHgj5npGnLv-opHe_jjckUP33t7cSL9KqMhcr75xD3HGxImOO7lxfX1ebvUE_WNog3wI15_B8b6FptgOK9sN_TA8Bss4GmTfx-IjLGS74anDeAPTU8GB_YtmYjfVs2Bpz7n9LJuk--2b6ZZTWWq3vYPbJX6heekKqf2gWlRL_5PWFxDqvu2HzVhuykPKZqOB2oj4JBoFsQkii15-Zl9Ib"/>
+</div>
+</div>
+<div class="col-span-4 px-4">
+<p class="font-body-lg text-on-surface">SonicWave Studio HP</p>
+<p class="text-[12px] text-zinc-400 font-bold">SKU: AUD-SW-HP01</p>
+</div>
+<div class="col-span-2 text-center">
+<span class="px-3 py-1 bg-zinc-100 text-[10px] font-black uppercase border border-zinc-200">Audio</span>
+</div>
+<div class="col-span-2 flex justify-center items-center gap-4">
+<button class="w-10 h-10 border-2 border-zinc-200 flex items-center justify-center hover:bg-zinc-200 active:bg-primary active:text-white transition-all">
+<span class="material-symbols-outlined" data-icon="remove">remove</span>
+</button>
+<span class="font-numeral-lg text-2xl w-16 text-center">156</span>
+<button class="w-10 h-10 border-2 border-zinc-200 flex items-center justify-center hover:bg-zinc-200 active:bg-primary active:text-white transition-all">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+</button>
+</div>
+<div class="col-span-3 flex justify-end gap-2 pr-4">
+<button class="bg-primary px-6 h-12 text-white font-label-xl text-xs uppercase hover:bg-primary-container active:invert duration-75">Update</button>
+<button class="w-12 h-12 border-2 border-zinc-200 flex items-center justify-center hover:bg-zinc-100">
+<span class="material-symbols-outlined text-zinc-400" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+</div>
+<!-- Item 4 (Out of Stock) -->
+<div class="grid grid-cols-12 items-center p-4 bg-error-container/20 hover:bg-error-container/30 transition-colors h-[touch-target-min]">
+<div class="col-span-1">
+<div class="w-16 h-16 bg-zinc-100 overflow-hidden border-2 border-error">
+<img class="w-full h-full object-cover grayscale" data-alt="modern black sunglasses on a reflective surface with bright professional studio lighting and clean lines" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBQQcsLeJBksw_BybsIFAqadW5wo4te0AzIeTt7PQEy5yxqntyPgkbcM-qQqw7Za1j8S0nX6zlUWAYpuNhBLy_n017ARvEPsUzZK4vx1Kx7CRbDYXxanzVy5ypER53c89rHX8RhlHeVNWoOksL1VqFynzbHvw-AGwbCzUMMvEfqcOKQGuJR8-SfmFVh1EYVv34It-AzMSedG3lMkmuwjzyTXHFs9i5CV-KP1hGwD0Iet2XpxZVVGp8rZEMVCj4MdPQgsg4jHxJSbwjI"/>
+</div>
+</div>
+<div class="col-span-4 px-4">
+<p class="font-body-lg text-on-surface">Urban Shades Stealth</p>
+<p class="text-[12px] text-error font-bold">OUT OF STOCK</p>
+</div>
+<div class="col-span-2 text-center">
+<span class="px-3 py-1 bg-error-container text-[10px] font-black uppercase border border-error">Accessories</span>
+</div>
+<div class="col-span-2 flex justify-center items-center gap-4">
+<button class="w-10 h-10 border-2 border-error/50 flex items-center justify-center hover:bg-error/10 transition-all">
+<span class="material-symbols-outlined" data-icon="remove">remove</span>
+</button>
+<span class="font-numeral-lg text-2xl w-16 text-center text-error">00</span>
+<button class="w-10 h-10 border-2 border-error/50 flex items-center justify-center hover:bg-error/10 transition-all">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+</button>
+</div>
+<div class="col-span-3 flex justify-end gap-2 pr-4">
+<button class="bg-error px-6 h-12 text-white font-label-xl text-xs uppercase hover:bg-error/90 active:invert duration-75">Restock</button>
+<button class="w-12 h-12 border-2 border-zinc-200 flex items-center justify-center hover:bg-zinc-100">
+<span class="material-symbols-outlined text-zinc-400" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Pagination Footer -->
+<div class="bg-zinc-50 p-6 flex items-center justify-between border-t-2 border-zinc-200">
+<p class="font-label-xl text-[12px] uppercase text-zinc-400">Showing 1-10 of 1,284 Products</p>
+<div class="flex gap-2">
+<button class="w-12 h-12 border-2 border-zinc-200 flex items-center justify-center hover:bg-white active:bg-zinc-200">
+<span class="material-symbols-outlined" data-icon="chevron_left">chevron_left</span>
+</button>
+<button class="w-12 h-12 bg-primary text-white flex items-center justify-center font-bold">1</button>
+<button class="w-12 h-12 border-2 border-zinc-200 flex items-center justify-center hover:bg-white active:bg-zinc-200">2</button>
+<button class="w-12 h-12 border-2 border-zinc-200 flex items-center justify-center hover:bg-white active:bg-zinc-200">3</button>
+<button class="w-12 h-12 border-2 border-zinc-200 flex items-center justify-center hover:bg-white active:bg-zinc-200">
+<span class="material-symbols-outlined" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Floating Action Button for Global Actions -->
+<button class="fixed bottom-margin-screen right-margin-screen w-20 h-20 bg-primary text-white flex items-center justify-center shadow-xl hover:scale-110 active:scale-95 transition-all z-50">
+<span class="material-symbols-outlined scale-150" data-icon="print" data-weight="fill">print</span>
+</button>
+</body></html>

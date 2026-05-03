@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-highest": "#e1e2ee",
+                        "surface-container-low": "#f2f3ff",
+                        "primary-container": "#0066ff",
+                        "on-background": "#191b24",
+                        "on-tertiary-container": "#fff6f4",
+                        "secondary-fixed": "#6ffbbe",
+                        "on-error": "#ffffff",
+                        "inverse-primary": "#b3c5ff",
+                        "background": "#faf8ff",
+                        "inverse-on-surface": "#eff0fd",
+                        "tertiary-fixed-dim": "#ffb59d",
+                        "tertiary-fixed": "#ffdbd0",
+                        "on-primary": "#ffffff",
+                        "surface-dim": "#d8d9e6",
+                        "on-secondary-fixed-variant": "#005236",
+                        "inverse-surface": "#2e303a",
+                        "surface-container-lowest": "#ffffff",
+                        "outline": "#727687",
+                        "on-secondary-fixed": "#002113",
+                        "on-primary-container": "#f8f7ff",
+                        "tertiary": "#a33200",
+                        "secondary-fixed-dim": "#4edea3",
+                        "primary-fixed-dim": "#b3c5ff",
+                        "surface-bright": "#faf8ff",
+                        "on-tertiary-fixed": "#390c00",
+                        "surface-container-high": "#e6e7f4",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-fixed-variant": "#003fa4",
+                        "surface-tint": "#0054d6",
+                        "primary": "#0050cb",
+                        "on-primary-fixed": "#001849",
+                        "on-secondary": "#ffffff",
+                        "surface-variant": "#e1e2ee",
+                        "secondary-container": "#6cf8bb",
+                        "on-surface": "#191b24",
+                        "on-tertiary-fixed-variant": "#832600",
+                        "on-error-container": "#93000a",
+                        "surface": "#faf8ff",
+                        "on-surface-variant": "#424656",
+                        "on-secondary-container": "#00714d",
+                        "tertiary-container": "#cc4204",
+                        "surface-container": "#ecedfa",
+                        "error-container": "#ffdad6",
+                        "primary-fixed": "#dae1ff",
+                        "outline-variant": "#c2c6d8",
+                        "secondary": "#006c49",
+                        "error": "#ba1a1a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "touch-target-min": "80px",
+                        "tile-padding": "20px",
+                        "gutter": "12px",
+                        "margin-screen": "24px",
+                        "stack-gap": "16px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Inter"],
+                        "display": ["Inter"],
+                        "numeral-lg": ["Inter"],
+                        "label-xl": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-md": ["18px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "display": ["48px", {"lineHeight": "1.1", "fontWeight": "700"}],
+                        "numeral-lg": ["36px", {"lineHeight": "1.0", "fontWeight": "700"}],
+                        "label-xl": ["22px", {"lineHeight": "1.0", "letterSpacing": "0.02em", "fontWeight": "700"}],
+                        "headline-md": ["24px", {"lineHeight": "1.2", "fontWeight": "600"}],
+                        "body-lg": ["20px", {"lineHeight": "1.5", "fontWeight": "500"}],
+                        "headline-lg": ["32px", {"lineHeight": "1.2", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #faf8ff;
+            color: #191b24;
+        }
+    </style>
+</head>
+<body class="font-body-md overflow-hidden">
+<!-- TopAppBar -->
+<header class="bg-zinc-50 dark:bg-zinc-950 border-b-2 border-zinc-200 dark:border-zinc-800 flex justify-between items-center w-full px-6 h-20 z-50 fixed top-0">
+<div class="flex items-center gap-4">
+<span class="text-2xl font-black text-zinc-900 dark:text-zinc-50 tracking-tighter font-inter font-bold tracking-tight">VELOCITY POS</span>
+<div class="h-8 w-[2px] bg-zinc-200"></div>
+<span class="font-inter font-bold tracking-tight text-blue-600 uppercase text-sm">Category Management</span>
+</div>
+<div class="flex items-center gap-2">
+<button class="w-14 h-14 flex items-center justify-center hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-100 active:bg-zinc-900 active:text-white">
+<span class="material-symbols-outlined text-zinc-500">wifi</span>
+</button>
+<button class="w-14 h-14 flex items-center justify-center hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-100 active:bg-zinc-900 active:text-white">
+<span class="material-symbols-outlined text-zinc-500">person</span>
+</button>
+<button class="w-14 h-14 flex items-center justify-center hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-100 active:bg-zinc-900 active:text-white">
+<span class="material-symbols-outlined text-blue-600">settings</span>
+</button>
+</div>
+</header>
+<!-- Main Layout Container -->
+<main class="flex h-screen pt-20">
+<!-- SideNavBar -->
+<nav class="bg-zinc-100 dark:bg-zinc-900 border-r-2 border-zinc-200 dark:border-zinc-800 flex flex-col pt-4 overflow-y-auto fixed left-0 top-20 w-[18%] h-[calc(100vh-80px)]">
+<div class="px-6 py-2 mb-4">
+<span class="font-inter text-sm font-bold uppercase tracking-widest text-zinc-500">CATEGORIES</span>
+</div>
+<a class="bg-blue-600 text-white flex flex-col items-center justify-center gap-2 h-24 m-2 rounded-none border-2 border-blue-700 active:invert duration-75" href="#">
+<span class="material-symbols-outlined" data-weight="fill" style="font-variation-settings: 'FILL' 1;">sell</span>
+<span class="font-inter text-sm font-bold uppercase tracking-widest">Deals</span>
+</a>
+<a class="bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 flex flex-col items-center justify-center gap-2 h-24 m-2 rounded-none border-2 border-zinc-200 dark:border-zinc-700 hover:border-blue-600 active:invert duration-75" href="#">
+<span class="material-symbols-outlined">restaurant</span>
+<span class="font-inter text-sm font-bold uppercase tracking-widest">Meals</span>
+</a>
+<a class="bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 flex flex-col items-center justify-center gap-2 h-24 m-2 rounded-none border-2 border-zinc-200 dark:border-zinc-700 hover:border-blue-600 active:invert duration-75" href="#">
+<span class="material-symbols-outlined">local_drink</span>
+<span class="font-inter text-sm font-bold uppercase tracking-widest">Drinks</span>
+</a>
+<a class="bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 flex flex-col items-center justify-center gap-2 h-24 m-2 rounded-none border-2 border-zinc-200 dark:border-zinc-700 hover:border-blue-600 active:invert duration-75" href="#">
+<span class="material-symbols-outlined">fastfood</span>
+<span class="font-inter text-sm font-bold uppercase tracking-widest">Snacks</span>
+</a>
+<a class="bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 flex flex-col items-center justify-center gap-2 h-24 m-2 rounded-none border-2 border-zinc-200 dark:border-zinc-700 hover:border-blue-600 active:invert duration-75" href="#">
+<span class="material-symbols-outlined">icecream</span>
+<span class="font-inter text-sm font-bold uppercase tracking-widest">Desserts</span>
+</a>
+</nav>
+<!-- Main Content Area -->
+<section class="ml-[18%] w-[82%] p-margin-screen overflow-y-auto">
+<div class="max-w-6xl mx-auto">
+<!-- Category Management Header -->
+<div class="flex justify-between items-end mb-stack-gap">
+<div>
+<h1 class="font-display text-display text-on-background">Category Inventory</h1>
+<p class="font-body-md text-on-surface-variant">Define and organize product groups for your POS interface.</p>
+</div>
+<button class="h-[80px] px-8 bg-primary text-on-primary font-label-xl uppercase border-2 border-primary-fixed-dim active:bg-on-primary-fixed transition-colors">
+                        Add New Category
+                    </button>
+</div>
+<!-- Bento Grid for Categories -->
+<div class="grid grid-cols-12 gap-gutter">
+<!-- Left Column: Detailed Category List -->
+<div class="col-span-8 flex flex-col gap-gutter">
+<!-- Category Row 1 -->
+<div class="h-touch-target-min bg-surface-container-lowest border-2 border-surface-container-highest flex items-center px-tile-padding group hover:border-primary transition-colors">
+<div class="w-12 h-12 flex items-center justify-center bg-primary-container text-white">
+<span class="material-symbols-outlined">sell</span>
+</div>
+<div class="ml-4 flex-1">
+<span class="font-headline-md text-on-surface">Deals</span>
+<span class="ml-4 text-sm font-body-md text-outline uppercase tracking-tighter">14 Products</span>
+</div>
+<div class="flex gap-2">
+<button class="w-12 h-12 flex items-center justify-center border-2 border-outline-variant hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant">edit</span>
+</button>
+<button class="w-12 h-12 flex items-center justify-center border-2 border-error hover:bg-error-container transition-colors">
+<span class="material-symbols-outlined text-error">delete</span>
+</button>
+</div>
+</div>
+<!-- Category Row 2 -->
+<div class="h-touch-target-min bg-surface-container-lowest border-2 border-surface-container-highest flex items-center px-tile-padding group hover:border-primary transition-colors">
+<div class="w-12 h-12 flex items-center justify-center bg-surface-variant text-on-surface-variant">
+<span class="material-symbols-outlined">restaurant</span>
+</div>
+<div class="ml-4 flex-1">
+<span class="font-headline-md text-on-surface">Meals</span>
+<span class="ml-4 text-sm font-body-md text-outline uppercase tracking-tighter">32 Products</span>
+</div>
+<div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="w-12 h-12 flex items-center justify-center border-2 border-outline-variant hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant">edit</span>
+</button>
+<button class="w-12 h-12 flex items-center justify-center border-2 border-error hover:bg-error-container transition-colors">
+<span class="material-symbols-outlined text-error">delete</span>
+</button>
+</div>
+</div>
+<!-- Category Row 3 -->
+<div class="h-touch-target-min bg-surface-container-lowest border-2 border-surface-container-highest flex items-center px-tile-padding group hover:border-primary transition-colors">
+<div class="w-12 h-12 flex items-center justify-center bg-surface-variant text-on-surface-variant">
+<span class="material-symbols-outlined">local_drink</span>
+</div>
+<div class="ml-4 flex-1">
+<span class="font-headline-md text-on-surface">Drinks</span>
+<span class="ml-4 text-sm font-body-md text-outline uppercase tracking-tighter">24 Products</span>
+</div>
+<div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="w-12 h-12 flex items-center justify-center border-2 border-outline-variant hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant">edit</span>
+</button>
+<button class="w-12 h-12 flex items-center justify-center border-2 border-error hover:bg-error-container transition-colors">
+<span class="material-symbols-outlined text-error">delete</span>
+</button>
+</div>
+</div>
+<!-- Category Row 4 -->
+<div class="h-touch-target-min bg-surface-container-lowest border-2 border-surface-container-highest flex items-center px-tile-padding group hover:border-primary transition-colors">
+<div class="w-12 h-12 flex items-center justify-center bg-surface-variant text-on-surface-variant">
+<span class="material-symbols-outlined">fastfood</span>
+</div>
+<div class="ml-4 flex-1">
+<span class="font-headline-md text-on-surface">Snacks</span>
+<span class="ml-4 text-sm font-body-md text-outline uppercase tracking-tighter">18 Products</span>
+</div>
+<div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="w-12 h-12 flex items-center justify-center border-2 border-outline-variant hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant">edit</span>
+</button>
+<button class="w-12 h-12 flex items-center justify-center border-2 border-error hover:bg-error-container transition-colors">
+<span class="material-symbols-outlined text-error">delete</span>
+</button>
+</div>
+</div>
+<!-- Category Row 5 -->
+<div class="h-touch-target-min bg-surface-container-lowest border-2 border-surface-container-highest flex items-center px-tile-padding group hover:border-primary transition-colors">
+<div class="w-12 h-12 flex items-center justify-center bg-surface-variant text-on-surface-variant">
+<span class="material-symbols-outlined">icecream</span>
+</div>
+<div class="ml-4 flex-1">
+<span class="font-headline-md text-on-surface">Desserts</span>
+<span class="ml-4 text-sm font-body-md text-outline uppercase tracking-tighter">9 Products</span>
+</div>
+<div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="w-12 h-12 flex items-center justify-center border-2 border-outline-variant hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant">edit</span>
+</button>
+<button class="w-12 h-12 flex items-center justify-center border-2 border-error hover:bg-error-container transition-colors">
+<span class="material-symbols-outlined text-error">delete</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Right Column: Editor Panel -->
+<div class="col-span-4 bg-white border-2 border-zinc-200 flex flex-col">
+<div class="p-tile-padding border-b-2 border-zinc-100 bg-zinc-50">
+<h3 class="font-label-xl uppercase tracking-widest text-on-surface-variant">Edit Category</h3>
+</div>
+<div class="p-tile-padding flex-1 flex flex-col gap-stack-gap">
+<!-- Category Name Input -->
+<div class="flex flex-col gap-2">
+<label class="font-body-md font-bold text-on-surface-variant uppercase text-xs">Name</label>
+<input class="h-touch-target-min border-2 border-surface-container-highest font-headline-md px-4 focus:border-primary focus:ring-0" type="text" value="Deals"/>
+</div>
+<!-- Icon Picker -->
+<div class="flex flex-col gap-2">
+<label class="font-body-md font-bold text-on-surface-variant uppercase text-xs">Icon Selection</label>
+<div class="grid grid-cols-4 gap-2">
+<!-- Selected Icon -->
+<button class="h-20 border-2 border-primary bg-primary-container text-white flex items-center justify-center">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">sell</span>
+</button>
+<!-- Options -->
+<button class="h-20 border-2 border-surface-container-highest hover:border-primary flex items-center justify-center">
+<span class="material-symbols-outlined">restaurant</span>
+</button>
+<button class="h-20 border-2 border-surface-container-highest hover:border-primary flex items-center justify-center">
+<span class="material-symbols-outlined">local_drink</span>
+</button>
+<button class="h-20 border-2 border-surface-container-highest hover:border-primary flex items-center justify-center">
+<span class="material-symbols-outlined">fastfood</span>
+</button>
+<button class="h-20 border-2 border-surface-container-highest hover:border-primary flex items-center justify-center">
+<span class="material-symbols-outlined">icecream</span>
+</button>
+<button class="h-20 border-2 border-surface-container-highest hover:border-primary flex items-center justify-center">
+<span class="material-symbols-outlined">coffee</span>
+</button>
+<button class="h-20 border-2 border-surface-container-highest hover:border-primary flex items-center justify-center">
+<span class="material-symbols-outlined">cake</span>
+</button>
+<button class="h-20 border-2 border-surface-container-highest hover:border-primary flex items-center justify-center">
+<span class="material-symbols-outlined">lunch_dining</span>
+</button>
+</div>
+</div>
+<!-- Color Palette selection (Extra UX) -->
+<div class="flex flex-col gap-2">
+<label class="font-body-md font-bold text-on-surface-variant uppercase text-xs">Theme Color</label>
+<div class="flex gap-2">
+<div class="w-10 h-10 bg-primary cursor-pointer border-4 border-white ring-2 ring-primary"></div>
+<div class="w-10 h-10 bg-secondary cursor-pointer border-4 border-white hover:ring-2 hover:ring-zinc-300"></div>
+<div class="w-10 h-10 bg-tertiary cursor-pointer border-4 border-white hover:ring-2 hover:ring-zinc-300"></div>
+<div class="w-10 h-10 bg-error cursor-pointer border-4 border-white hover:ring-2 hover:ring-zinc-300"></div>
+</div>
+</div>
+</div>
+<!-- Editor Actions -->
+<div class="p-tile-padding flex gap-2">
+<button class="flex-1 h-touch-target-min border-2 border-surface-container-highest font-label-xl uppercase text-on-surface-variant active:bg-zinc-100">
+                                Cancel
+                            </button>
+<button class="flex-1 h-touch-target-min bg-on-background text-white font-label-xl uppercase active:bg-black">
+                                Save
+                            </button>
+</div>
+</div>
+</div>
+<!-- Footer Stats Section (Bento Bottom) -->
+<div class="mt-gutter grid grid-cols-3 gap-gutter">
+<div class="bg-surface-container-low p-tile-padding border-2 border-surface-container-highest">
+<div class="text-on-surface-variant text-xs font-bold uppercase tracking-widest mb-1">Total Categories</div>
+<div class="font-numeral-lg text-primary">05</div>
+</div>
+<div class="bg-surface-container-low p-tile-padding border-2 border-surface-container-highest">
+<div class="text-on-surface-variant text-xs font-bold uppercase tracking-widest mb-1">Active Products</div>
+<div class="font-numeral-lg text-on-surface">97</div>
+</div>
+<div class="bg-primary-container p-tile-padding border-2 border-primary">
+<div class="text-white/80 text-xs font-bold uppercase tracking-widest mb-1 text-center">Export Categories</div>
+<div class="flex justify-center mt-2">
+<span class="material-symbols-outlined text-white text-4xl">download</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Fixed Bottom Action Bar (Transactional Logic) - Suppressed for Admin Screen -->
+<!-- Contextual FAB - Suppressed as per Rules for Settings/Management Screens -->
+</body></html>
