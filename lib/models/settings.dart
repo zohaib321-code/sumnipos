@@ -83,6 +83,14 @@ class SystemSettings {
   final int tableFontSize;
   final int tableAlignment; // 0: Left, 1: Center, 2: Right
 
+  // Header settings
+  final int storeNameSize;
+  final bool storeNameBold;
+  final int storeAddressSize;
+  final bool storeAddressBold;
+  final int storePhoneSize;
+  final bool storePhoneBold;
+
   SystemSettings({
     required this.storeName,
     required this.storeAddress,
@@ -96,6 +104,12 @@ class SystemSettings {
     this.footerItems = const [],
     this.tableFontSize = 20,
     this.tableAlignment = 1,
+    this.storeNameSize = 36,
+    this.storeNameBold = true,
+    this.storeAddressSize = 22,
+    this.storeAddressBold = false,
+    this.storePhoneSize = 22,
+    this.storePhoneBold = false,
   });
 
   Map<String, dynamic> toMap() {
@@ -113,6 +127,12 @@ class SystemSettings {
       'footer_items': jsonEncode(footerItems.map((e) => e.toMap()).toList()),
       'table_font_size': tableFontSize,
       'table_alignment': tableAlignment,
+      'store_name_size': storeNameSize,
+      'store_name_bold': storeNameBold ? 1 : 0,
+      'store_address_size': storeAddressSize,
+      'store_address_bold': storeAddressBold ? 1 : 0,
+      'store_phone_size': storePhoneSize,
+      'store_phone_bold': storePhoneBold ? 1 : 0,
     };
   }
 
@@ -156,6 +176,12 @@ class SystemSettings {
       footerItems: footers,
       tableFontSize: map['table_font_size'] ?? 20,
       tableAlignment: map['table_alignment'] ?? 1,
+      storeNameSize: map['store_name_size'] ?? 36,
+      storeNameBold: (map['store_name_bold'] ?? 1) == 1,
+      storeAddressSize: map['store_address_size'] ?? 22,
+      storeAddressBold: (map['store_address_bold'] ?? 0) == 1,
+      storePhoneSize: map['store_phone_size'] ?? 22,
+      storePhoneBold: (map['store_phone_bold'] ?? 0) == 1,
     );
   }
 
@@ -175,6 +201,12 @@ class SystemSettings {
       ],
       tableFontSize: 24,
       tableAlignment: 1,
+      storeNameSize: 36,
+      storeNameBold: true,
+      storeAddressSize: 22,
+      storeAddressBold: false,
+      storePhoneSize: 22,
+      storePhoneBold: false,
     );
   }
 
@@ -191,6 +223,12 @@ class SystemSettings {
     List<ReceiptItem>? footerItems,
     int? tableFontSize,
     int? tableAlignment,
+    int? storeNameSize,
+    bool? storeNameBold,
+    int? storeAddressSize,
+    bool? storeAddressBold,
+    int? storePhoneSize,
+    bool? storePhoneBold,
   }) {
     return SystemSettings(
       storeName: storeName ?? this.storeName,
@@ -205,6 +243,14 @@ class SystemSettings {
       footerItems: footerItems ?? this.footerItems,
       tableFontSize: tableFontSize ?? this.tableFontSize,
       tableAlignment: tableAlignment ?? this.tableAlignment,
+      storeNameSize: storeNameSize ?? this.storeNameSize,
+      storeNameBold: storeNameBold ?? this.storeNameBold,
+      storeAddressSize: storeAddressSize ?? this.storeAddressSize,
+      storeAddressBold: storeAddressBold ?? this.storeAddressBold,
+      storePhoneSize: storePhoneSize ?? this.storePhoneSize,
+      storePhoneBold: storePhoneBold ?? this.storePhoneBold,
     );
   }
 }
+
+

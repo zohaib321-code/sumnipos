@@ -25,6 +25,12 @@ class _SystemSettingsScreenState extends State<SystemSettingsScreen> {
   List<ReceiptItem> _footerItems = [];
   int _tableFontSize = 24;
   int _tableAlignment = 1;
+  int _storeNameSize = 36;
+  bool _storeNameBold = true;
+  int _storeAddressSize = 22;
+  bool _storeAddressBold = false;
+  int _storePhoneSize = 22;
+  bool _storePhoneBold = false;
   String _customerPrinter = 'internal|default|Internal Sunmi Printer';
   String _kitchenPrinter = 'internal|default|Internal Sunmi Printer';
   bool _isLoading = true;
@@ -50,6 +56,12 @@ class _SystemSettingsScreenState extends State<SystemSettingsScreen> {
       _footerItems = List.from(settings.footerItems);
       _tableFontSize = settings.tableFontSize;
       _tableAlignment = settings.tableAlignment;
+      _storeNameSize = settings.storeNameSize;
+      _storeNameBold = settings.storeNameBold;
+      _storeAddressSize = settings.storeAddressSize;
+      _storeAddressBold = settings.storeAddressBold;
+      _storePhoneSize = settings.storePhoneSize;
+      _storePhoneBold = settings.storePhoneBold;
       _isLoading = false;
     });
   }
@@ -78,10 +90,15 @@ class _SystemSettingsScreenState extends State<SystemSettingsScreen> {
       customCharges: _customCharges,
       customerPrinter: _customerPrinter,
       kitchenPrinter: _kitchenPrinter,
-      headerItems: _headerItems,
       footerItems: _footerItems,
       tableFontSize: _tableFontSize,
       tableAlignment: _tableAlignment,
+      storeNameSize: _storeNameSize,
+      storeNameBold: _storeNameBold,
+      storeAddressSize: _storeAddressSize,
+      storeAddressBold: _storeAddressBold,
+      storePhoneSize: _storePhoneSize,
+      storePhoneBold: _storePhoneBold,
     );
     await DatabaseHelper.instance.updateSettings(settings);
     if (mounted) context.read<CartProvider>().refreshSettings();
@@ -131,9 +148,32 @@ class _SystemSettingsScreenState extends State<SystemSettingsScreen> {
                     const SizedBox(height: 12),
                     _SettingsGroup(
                       children: [
-                        _EditRow(label: 'Store Name', controller: _nameController, hint: 'POS Restaurant'),
-                        _EditRow(label: 'Address', controller: _addressController, hint: 'Location detail...'),
-                        _EditRow(label: 'Contact Phone', controller: _phoneController, hint: '+92...'),
+                        _SimpleSettingRow(
+                          label: 'RESTAURANT NAME', 
+                          controller: _nameController, 
+                          size: _storeNameSize,
+                          isBold: _storeNameBold,
+                          onSizeChanged: (v) => setState(() => _storeNameSize = v),
+                          onBoldToggle: (v) => setState(() => _storeNameBold = v),
+                        ),
+                        const Divider(height: 1, indent: 20, endIndent: 20),
+                        _SimpleSettingRow(
+                          label: 'ADDRESS DETAIL', 
+                          controller: _addressController, 
+                          size: _storeAddressSize,
+                          isBold: _storeAddressBold,
+                          onSizeChanged: (v) => setState(() => _storeAddressSize = v),
+                          onBoldToggle: (v) => setState(() => _storeAddressBold = v),
+                        ),
+                        const Divider(height: 1, indent: 20, endIndent: 20),
+                        _SimpleSettingRow(
+                          label: 'CONTACT / PHONE', 
+                          controller: _phoneController, 
+                          size: _storePhoneSize,
+                          isBold: _storePhoneBold,
+                          onSizeChanged: (v) => setState(() => _storePhoneSize = v),
+                          onBoldToggle: (v) => setState(() => _storePhoneBold = v),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 32),
@@ -210,20 +250,6 @@ class _SystemSettingsScreenState extends State<SystemSettingsScreen> {
                               underline: const SizedBox(),
                               items: [20, 24, 28, 32].map((e) => DropdownMenuItem(value: e, child: Text(e.toString(), style: const TextStyle(fontSize: 12)))).toList(),
                               onChanged: (v) => setState(() => _tableFontSize = v!),
-                            ),
-                            const SizedBox(width: 16),
-                            const Text('Align:', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
-                            const SizedBox(width: 8),
-                            DropdownButton<int>(
-                              value: _tableAlignment,
-                              isDense: true,
-                              underline: const SizedBox(),
-                              items: const [
-                                DropdownMenuItem(value: 0, child: Text('Left', style: TextStyle(fontSize: 12))),
-                                DropdownMenuItem(value: 1, child: Text('Center', style: TextStyle(fontSize: 12))),
-                                DropdownMenuItem(value: 2, child: Text('Right', style: TextStyle(fontSize: 12))),
-                              ],
-                              onChanged: (v) => setState(() => _tableAlignment = v!),
                             ),
                           ],
                         ),
@@ -358,6 +384,12 @@ class _SystemSettingsScreenState extends State<SystemSettingsScreen> {
                         footerItems: _footerItems,
                         tableFontSize: _tableFontSize,
                         tableAlignment: _tableAlignment,
+                        storeNameSize: _storeNameSize,
+                        storeNameBold: _storeNameBold,
+                        storeAddressSize: _storeAddressSize,
+                        storeAddressBold: _storeAddressBold,
+                        storePhoneSize: _storePhoneSize,
+                        storePhoneBold: _storePhoneBold,
                       ),
                     ),
                   ),
@@ -743,9 +775,14 @@ class _ReceiptPreview extends StatelessWidget {
   final String phone;
   final List<CustomCharge> charges;
   final List<ReceiptItem> headerItems;
-  final List<ReceiptItem> footerItems;
   final int tableFontSize;
   final int tableAlignment;
+  final int storeNameSize;
+  final bool storeNameBold;
+  final int storeAddressSize;
+  final bool storeAddressBold;
+  final int storePhoneSize;
+  final bool storePhoneBold;
 
   const _ReceiptPreview({
     required this.storeName,
@@ -756,6 +793,12 @@ class _ReceiptPreview extends StatelessWidget {
     required this.footerItems,
     required this.tableFontSize,
     required this.tableAlignment,
+    required this.storeNameSize,
+    required this.storeNameBold,
+    required this.storeAddressSize,
+    required this.storeAddressBold,
+    required this.storePhoneSize,
+    required this.storePhoneBold,
   });
   
   @override
@@ -784,7 +827,7 @@ class _ReceiptPreview extends StatelessWidget {
     }
 
     const divider = Text(
-      '------------------------------------------',
+      '━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
       maxLines: 1,
       overflow: TextOverflow.clip,
       style: TextStyle(color: AppTheme.outline, letterSpacing: -1, fontWeight: FontWeight.bold),
@@ -805,15 +848,15 @@ class _ReceiptPreview extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           if (headerItems.isEmpty) ...[
-            Text(storeName.isEmpty ? 'STORE NAME' : storeName.toUpperCase(), textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 14, height: 1.2)),
-            if (address.isNotEmpty) Text(address, textAlign: TextAlign.center, style: const TextStyle(fontSize: 10, color: AppTheme.textMuted)),
-            if (phone.isNotEmpty) Text('TEL: $phone', textAlign: TextAlign.center, style: const TextStyle(fontSize: 10, color: AppTheme.textMuted)),
+            Text(storeName.isEmpty ? 'STORE NAME' : storeName.toUpperCase(), textAlign: TextAlign.center, style: TextStyle(fontWeight: storeNameBold ? FontWeight.w900 : FontWeight.normal, fontSize: storeNameSize * 0.4, height: 1.2)),
+            if (address.isNotEmpty) Text(address, textAlign: TextAlign.center, style: TextStyle(fontSize: storeAddressSize * 0.45, fontWeight: storeAddressBold ? FontWeight.bold : FontWeight.normal, color: AppTheme.textMuted)),
+            if (phone.isNotEmpty) Text('TEL: $phone', textAlign: TextAlign.center, style: TextStyle(fontSize: storePhoneSize * 0.45, fontWeight: storePhoneBold ? FontWeight.bold : FontWeight.normal, color: AppTheme.textMuted)),
           ] else
             ...headerItems.map((item) => Text(
               item.text,
               textAlign: getTextAlign(item.alignment),
               style: TextStyle(
-                fontSize: item.fontSize * 0.5,
+                fontSize: item.fontSize * 0.4,
                 fontWeight: item.isBold ? FontWeight.bold : FontWeight.normal,
               ),
             )),
@@ -871,10 +914,16 @@ class _ReceiptPreview extends StatelessWidget {
               item.text,
               textAlign: getTextAlign(item.alignment),
               style: TextStyle(
-                fontSize: item.fontSize * 0.5,
+                fontSize: item.fontSize * 0.4,
                 fontWeight: item.isBold ? FontWeight.bold : FontWeight.normal,
               ),
             )),
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 12),
+            child: divider,
+          ),
+          const Text('Developed by Arcade Developers', textAlign: TextAlign.center, style: TextStyle(fontSize: 8, fontWeight: FontWeight.bold, color: AppTheme.textMuted)),
+          const Text('and Marketing: 03135734950', textAlign: TextAlign.center, style: TextStyle(fontSize: 8, color: AppTheme.textMuted)),
         ],
       ),
     );
@@ -954,6 +1003,102 @@ class _EditRow extends StatelessWidget {
           SizedBox(width: 140, child: Text(label, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12))),
           Expanded(child: TextFormField(controller: controller, maxLines: maxLines, decoration: InputDecoration(hintText: hint, isDense: true))),
         ],
+      ),
+    );
+  }
+}
+
+class _SimpleSettingRow extends StatelessWidget {
+  final String label;
+  final TextEditingController controller;
+  final int size;
+  final bool isBold;
+  final ValueChanged<int> onSizeChanged;
+  final ValueChanged<bool> onBoldToggle;
+
+  const _SimpleSettingRow({
+    required this.label,
+    required this.controller,
+    required this.size,
+    required this.isBold,
+    required this.onSizeChanged,
+    required this.onBoldToggle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 10, color: AppTheme.textMuted, letterSpacing: 0.5)),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: TextFormField(
+                  controller: controller,
+                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                  decoration: const InputDecoration(
+                    isDense: true,
+                    contentPadding: EdgeInsets.symmetric(vertical: 8),
+                    border: InputBorder.none,
+                    hintText: 'Enter detail...',
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
+              // Size Control
+              Container(
+                decoration: BoxDecoration(
+                  color: AppTheme.background,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _StepButton(icon: Icons.remove, onTap: () => onSizeChanged(size - 2)),
+                    SizedBox(width: 32, child: Text(size.toString(), textAlign: TextAlign.center, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold))),
+                    _StepButton(icon: Icons.add, onTap: () => onSizeChanged(size + 2)),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              // Bold Toggle
+              InkWell(
+                onTap: () => onBoldToggle(!isBold),
+                child: Container(
+                  width: 36,
+                  height: 36,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: isBold ? AppTheme.primary : AppTheme.background,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text('B', style: TextStyle(color: isBold ? Colors.white : AppTheme.onSurface, fontWeight: FontWeight.w900, fontSize: 14)),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StepButton extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+  const _StepButton({required this.icon, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Icon(icon, size: 14, color: AppTheme.primary),
       ),
     );
   }

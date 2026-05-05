@@ -144,9 +144,14 @@ class PrinterService {
         await _channel.invokeMethod('PRINT_TEXT', {'text': '--- TEST PRINT ---\n', 'size': 20});
         
         // Table
-        final int tableWidth = _calculateWidth(tableFontSize);
-        await _channel.invokeMethod('SET_ALIGNMENT', {'alignment': tableAlignment});
-        await _channel.invokeMethod('PRINT_TEXT', {'text': _formatLine('QTY  ITEM', 'PRICE', width: tableWidth) + '\n', 'size': tableFontSize, 'bold': true});
+        final tableWidth = _getCharsPerLine(tableFontSize);
+        await _channel.invokeMethod('SET_ALIGNMENT', {'alignment': 0});
+        await _channel.invokeMethod('PRINT_TEXT', {
+          'text': _formatLine('QTY ITEM', 'PRICE', width: tableWidth) + '\n', 
+          'size': tableFontSize, 
+          'bold': true
+        });
+        await _channel.invokeMethod('PRINT_TEXT', {'text': '--------------------------------\n', 'size': 20});
         await _channel.invokeMethod('PRINT_TEXT', {'text': _formatLine('1 x TEST ITEM', '100', width: tableWidth) + '\n', 'size': tableFontSize});
         
         // Footer
@@ -168,12 +173,11 @@ class PrinterService {
          debugPrint("Sunmi Print Error: $e");
       }
     } else if (device.type == PrinterType.network) {
-      // Basic network test print (simplified)
       try {
         final socket = await Socket.connect(device.address, 9100, timeout: const Duration(seconds: 2));
-        socket.add([0x1B, 0x40]); // Initialize
+        socket.add([0x1B, 0x40]);
         socket.add(utf8.encode("\n\nTEST PRINT\nStore: $storeName\n\n\n\n"));
-        socket.add([0x1D, 0x56, 0x41, 0x00]); // Cut
+        socket.add([0x1D, 0x56, 0x41, 0x00]);
         await socket.flush();
         socket.destroy();
       } catch (e) {
@@ -182,87 +186,98 @@ class PrinterService {
     }
   }
 
-  // --- NETWORK PRINTING (RAW ESC/POS) ---
   static Future<void> _printNetwork(Order order, String ip, {required bool isKitchen}) async {
     try {
       final settings = await DatabaseHelper.instance.getSettings();
       final formatter = DateFormat('yyyy-MM-dd HH:mm');
-      const String divider = '--------------------------------\n';
+      const String divider = '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
       final socket = await Socket.connect(ip, 9100, timeout: const Duration(seconds: 2));
       
-      socket.add([0x1B, 0x40]); // Initialize
-      socket.add([0x1B, 0x61, 0x01]); // Center alignment
+      socket.add([0x1B, 0x40]); 
+      socket.add([0x1B, 0x61, 0x01]);
 
       if (!isKitchen) {
         if (settings.storeName.isNotEmpty) {
-          socket.add([0x1B, 0x21, 0x30]); // Double height/width
+          socket.add(settings.storeNameBold ? [0x1B, 0x21, 0x38] : [0x1B, 0x21, 0x30]);
           socket.add(utf8.encode("${settings.storeName.toUpperCase()}\n"));
         }
         if (settings.storeAddress.isNotEmpty) {
-          socket.add([0x1B, 0x21, 0x00]); // Normal
+          socket.add(settings.storeAddressBold ? [0x1B, 0x21, 0x08] : [0x1B, 0x21, 0x00]);
           socket.add(utf8.encode("${settings.storeAddress}\n"));
         }
         if (settings.storePhone.isNotEmpty) {
+          socket.add(settings.storePhoneBold ? [0x1B, 0x21, 0x08] : [0x1B, 0x21, 0x00]);
           socket.add(utf8.encode("TEL: ${settings.storePhone}\n"));
         }
         socket.add(utf8.encode(divider));
       }
 
-      socket.add([0x1B, 0x21, 0x08]); // Bold
+      socket.add([0x1B, 0x21, 0x08]);
       socket.add(utf8.encode(isKitchen ? "KITCHEN ORDER\n" : "CUSTOMER RECEIPT\n"));
-      socket.add([0x1B, 0x21, 0x00]); // Normal
+      socket.add([0x1B, 0x21, 0x00]);
       socket.add(utf8.encode("Order: #${order.id}\n"));
       socket.add(utf8.encode("Date: ${formatter.format(order.dateTime)}\n"));
       
-      socket.add([0x1B, 0x61, 0x00]); // Left
+      socket.add([0x1B, 0x61, 0x00]);
       socket.add(utf8.encode(divider));
 
+      final width = _getCharsPerLine(24);
       if (!isKitchen) {
-        socket.add(utf8.encode(_formatLine('QTY  ITEM', 'PRICE') + '\n'));
+        socket.add(utf8.encode(_formatLine('QTY  ITEM', 'PRICE', width: width) + '\n'));
       } else {
         socket.add(utf8.encode("QTY  ITEM\n"));
       }
 
       for (var item in order.items) {
          if (isKitchen) {
-           socket.add([0x1B, 0x21, 0x08]); // Bold
+           socket.add([0x1B, 0x21, 0x08]);
            socket.add(utf8.encode("${item.quantity} x ${item.productName}\n"));
-           socket.add([0x1B, 0x21, 0x00]); // Normal
+           socket.add([0x1B, 0x21, 0x00]);
            if (item.notes != null && item.notes!.isNotEmpty) {
               socket.add(utf8.encode("   * Note: ${item.notes}\n"));
            }
          } else {
-            String leftSide = '${item.quantity} x ${item.productName}';
-            if (leftSide.length > 22) leftSide = leftSide.substring(0, 22);
-            socket.add(utf8.encode(_formatLine(leftSide, item.price.toStringAsFixed(0)) + '\n'));
+            String name = item.productName;
+            String price = item.price.toStringAsFixed(0);
+            String qtyLine = '${item.quantity} x ';
+            int maxName = width - qtyLine.length - price.length - 2;
+            
+            if (name.length > maxName) {
+              socket.add(utf8.encode(qtyLine + name.substring(0, maxName) + '\n'));
+              socket.add(utf8.encode(_formatLine('  ' + name.substring(maxName), price, width: width) + '\n'));
+            } else {
+              socket.add(utf8.encode(_formatLine(qtyLine + name, price, width: width) + '\n'));
+            }
          }
       }
 
       if (!isKitchen) {
-        socket.add([0x1B, 0x61, 0x01]); // Center
+        socket.add([0x1B, 0x61, 0x01]);
         socket.add(utf8.encode(divider));
-        socket.add([0x1B, 0x61, 0x00]); // Left
-        socket.add(utf8.encode(_formatLine('SUBTOTAL', order.subtotal.toStringAsFixed(0)) + '\n'));
+        socket.add([0x1B, 0x61, 0x00]);
+        socket.add(utf8.encode(_formatLine('SUBTOTAL', order.subtotal.toStringAsFixed(0), width: width) + '\n'));
         for (var charge in order.charges) {
            String label = charge.percentage > 0 
                ? '${charge.name.toUpperCase()} (${charge.percentage.toStringAsFixed(0)}%)'
                : charge.name.toUpperCase();
-           socket.add(utf8.encode(_formatLine(label, charge.amount.toStringAsFixed(0)) + '\n'));
+           socket.add(utf8.encode(_formatLine(label, charge.amount.toStringAsFixed(0), width: width) + '\n'));
         }
         socket.add(utf8.encode(divider));
-        socket.add([0x1B, 0x21, 0x10]); // Large (Double height)
-        socket.add(utf8.encode(_formatLine('TOTAL', 'Rs. ${order.totalAmount.toStringAsFixed(0)}') + '\n'));
-        socket.add([0x1B, 0x21, 0x00]); // Normal
-        socket.add([0x1B, 0x61, 0x01]); // Center
+        socket.add([0x1B, 0x21, 0x10]);
+        socket.add(utf8.encode(_formatLine('TOTAL', 'Rs. ${order.totalAmount.toStringAsFixed(0)}', width: _getCharsPerLine(32)) + '\n'));
+        socket.add([0x1B, 0x21, 0x00]);
+        socket.add([0x1B, 0x61, 0x01]);
         socket.add(utf8.encode(divider));
         if (settings.footerMessage.isNotEmpty) {
           socket.add(utf8.encode("${settings.footerMessage}\n"));
         }
         socket.add(utf8.encode("THANK YOU!\n"));
+        socket.add(utf8.encode("Developed by Arcade Developers\n"));
+        socket.add(utf8.encode("and Marketing: 03135734950\n"));
       }
 
       socket.add(utf8.encode("\n\n\n\n"));
-      socket.add([0x1D, 0x56, 0x41, 0x00]); // Cut
+      socket.add([0x1D, 0x56, 0x41, 0x00]);
       await socket.flush();
       socket.destroy();
     } catch (e) {
@@ -270,28 +285,29 @@ class PrinterService {
     }
   }
 
-  static int _calculateWidth(int fontSize) {
-    if (fontSize >= 32) return 16;
-    if (fontSize >= 28) return 20;
-    if (fontSize >= 24) return 24;
+  static int _getCharsPerLine(int fontSize) {
+    if (fontSize >= 36) return 16;
+    if (fontSize >= 32) return 20;
+    if (fontSize >= 28) return 24;
+    if (fontSize >= 24) return 32;
     return 32;
   }
 
-  static String _formatLine(String left, String right, {int width = 32}) {
-    int spaces = width - left.length - right.length;
-    if (spaces < 1) spaces = 1;
-    return left + (' ' * spaces) + right;
+  static String _formatLine(String left, dynamic right, {int width = 32}) {
+    String rightStr = right.toString();
+    int spaces = width - left.length - rightStr.length;
+    if (spaces < 1) return left + " " + rightStr;
+    return left + (' ' * spaces) + rightStr;
   }
 
   static Future<void> _printSunmi(Order order, {required bool isKitchen}) async {
     try {
       final settings = await DatabaseHelper.instance.getSettings();
       final formatter = DateFormat('yyyy-MM-dd HH:mm');
-      const String divider = '--------------------------------';
+      const String divider = '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━';
 
       await _channel.invokeMethod('INIT_PRINTER');
       
-      // Header Section
       if (!isKitchen) {
         if (settings.headerItems.isNotEmpty) {
           for (var item in settings.headerItems) {
@@ -303,24 +319,34 @@ class PrinterService {
             });
           }
         } else {
-          // Default Header if no custom items
-          await _channel.invokeMethod('SET_ALIGNMENT', {'alignment': 1}); // Center
+          await _channel.invokeMethod('SET_ALIGNMENT', {'alignment': 1});
           if (settings.storeName.isNotEmpty) {
-            await _channel.invokeMethod('PRINT_TEXT', {'text': '${settings.storeName.toUpperCase()}\n', 'size': 36, 'bold': true});
+            await _channel.invokeMethod('PRINT_TEXT', {
+              'text': '${settings.storeName.toUpperCase()}\n', 
+              'size': settings.storeNameSize, 
+              'bold': settings.storeNameBold
+            });
           }
           if (settings.storeAddress.isNotEmpty) {
-            await _channel.invokeMethod('PRINT_TEXT', {'text': '${settings.storeAddress}\n', 'size': 22});
+            await _channel.invokeMethod('PRINT_TEXT', {
+              'text': '${settings.storeAddress}\n', 
+              'size': settings.storeAddressSize,
+              'bold': settings.storeAddressBold
+            });
           }
           if (settings.storePhone.isNotEmpty) {
-            await _channel.invokeMethod('PRINT_TEXT', {'text': 'TEL: ${settings.storePhone}\n', 'size': 22});
+            await _channel.invokeMethod('PRINT_TEXT', {
+              'text': 'TEL: ${settings.storePhone}\n', 
+              'size': settings.storePhoneSize,
+              'bold': settings.storePhoneBold
+            });
           }
         }
         await _channel.invokeMethod('SET_ALIGNMENT', {'alignment': 1});
         await _channel.invokeMethod('PRINT_TEXT', {'text': '$divider\n', 'size': 20});
       }
 
-      // Title & Order Info
-      await _channel.invokeMethod('SET_ALIGNMENT', {'alignment': 1}); // Center
+      await _channel.invokeMethod('SET_ALIGNMENT', {'alignment': 1});
       await _channel.invokeMethod('PRINT_TEXT', {
         'text': isKitchen ? 'KITCHEN ORDER\n' : 'CUSTOMER RECEIPT\n', 
         'size': 32,
@@ -329,11 +355,10 @@ class PrinterService {
       await _channel.invokeMethod('PRINT_TEXT', {'text': 'Order: #${order.id}\n', 'size': 24});
       await _channel.invokeMethod('PRINT_TEXT', {'text': 'Date: ${formatter.format(order.dateTime)}\n', 'size': 24});
       
-      await _channel.invokeMethod('SET_ALIGNMENT', {'alignment': 0}); // Left
+      await _channel.invokeMethod('SET_ALIGNMENT', {'alignment': 0});
       await _channel.invokeMethod('PRINT_TEXT', {'text': '$divider\n', 'size': 20});
 
-      // Column Headers
-      final int tableWidth = _calculateWidth(settings.tableFontSize);
+      final int tableWidth = _getCharsPerLine(settings.tableFontSize);
       if (!isKitchen) {
         await _channel.invokeMethod('SET_ALIGNMENT', {'alignment': settings.tableAlignment});
         await _channel.invokeMethod('PRINT_TEXT', {
@@ -346,7 +371,6 @@ class PrinterService {
         await _channel.invokeMethod('PRINT_TEXT', {'text': 'QTY  ITEM\n', 'size': 28, 'bold': true});
       }
       
-      // Items
       for (var item in order.items) {
         if (isKitchen) {
           await _channel.invokeMethod('PRINT_TEXT', {'text': '${item.quantity} x ${item.productName}\n', 'size': 32, 'bold': true});
@@ -354,26 +378,40 @@ class PrinterService {
              await _channel.invokeMethod('PRINT_TEXT', {'text': '   * Note: ${item.notes}\n', 'size': 24});
           }
         } else {
-           String leftSide = '${item.quantity} x ${item.productName}';
-           // Adjust truncation based on tableWidth
-           int maxLeft = tableWidth - 8; // reserved for price
-           if (leftSide.length > maxLeft) leftSide = leftSide.substring(0, maxLeft);
+           String qtyPrefix = '${item.quantity} x ';
+           String name = item.productName;
+           String price = item.price.toStringAsFixed(0);
            
-           String rightSide = item.price.toStringAsFixed(0);
-           await _channel.invokeMethod('SET_ALIGNMENT', {'alignment': settings.tableAlignment});
-           await _channel.invokeMethod('PRINT_TEXT', {
-             'text': _formatLine(leftSide, rightSide, width: tableWidth) + '\n', 
-             'size': settings.tableFontSize
-           });
+           int reservedForPrice = price.length + 2; 
+           int firstLineMax = tableWidth - qtyPrefix.length - reservedForPrice;
+           
+           if (name.length <= firstLineMax) {
+             await _channel.invokeMethod('PRINT_TEXT', {
+               'text': _formatLine(qtyPrefix + name, price, width: tableWidth) + '\n', 
+               'size': settings.tableFontSize
+             });
+           } else {
+             String firstLineName = name.substring(0, firstLineMax);
+             String remainingName = name.substring(firstLineMax);
+             
+             await _channel.invokeMethod('PRINT_TEXT', {
+               'text': qtyPrefix + firstLineName + '\n', 
+               'size': settings.tableFontSize
+             });
+             
+             await _channel.invokeMethod('PRINT_TEXT', {
+               'text': _formatLine('  ' + remainingName, price, width: tableWidth) + '\n', 
+               'size': settings.tableFontSize
+             });
+           }
         }
       }
 
-      // Totals Section
       if (!isKitchen) {
-        await _channel.invokeMethod('SET_ALIGNMENT', {'alignment': 1}); // Center
+        await _channel.invokeMethod('SET_ALIGNMENT', {'alignment': 1});
         await _channel.invokeMethod('PRINT_TEXT', {'text': '$divider\n', 'size': 20});
         
-        await _channel.invokeMethod('SET_ALIGNMENT', {'alignment': 0}); // Left
+        await _channel.invokeMethod('SET_ALIGNMENT', {'alignment': 0});
         await _channel.invokeMethod('PRINT_TEXT', {
           'text': _formatLine('SUBTOTAL', order.subtotal.toStringAsFixed(0), width: tableWidth) + '\n', 
           'size': settings.tableFontSize
@@ -390,14 +428,15 @@ class PrinterService {
         }
         
         await _channel.invokeMethod('PRINT_TEXT', {'text': '$divider\n', 'size': 20});
+        
+        int totalWidth = _getCharsPerLine(36);
         await _channel.invokeMethod('PRINT_TEXT', {
-          'text': _formatLine('TOTAL', 'Rs. ${order.totalAmount.toStringAsFixed(0)}', width: _calculateWidth(36)) + '\n', 
+          'text': _formatLine('TOTAL', 'Rs. ${order.totalAmount.toStringAsFixed(0)}', width: totalWidth) + '\n', 
           'size': 36,
           'bold': true
         });
         
-        // Footer Section
-        await _channel.invokeMethod('SET_ALIGNMENT', {'alignment': 1}); // Center
+        await _channel.invokeMethod('SET_ALIGNMENT', {'alignment': 1});
         await _channel.invokeMethod('PRINT_TEXT', {'text': '$divider\n', 'size': 20});
         
         if (settings.footerItems.isNotEmpty) {
@@ -416,6 +455,12 @@ class PrinterService {
           }
           await _channel.invokeMethod('PRINT_TEXT', {'text': 'THANK YOU!\n', 'size': 28, 'bold': true});
         }
+
+        // --- FINAL ARCADE BRANDING ---
+        await _channel.invokeMethod('SET_ALIGNMENT', {'alignment': 1});
+        await _channel.invokeMethod('PRINT_TEXT', {'text': '$divider\n', 'size': 20});
+        await _channel.invokeMethod('PRINT_TEXT', {'text': 'Developed by Arcade Developers\n', 'size': 18});
+        await _channel.invokeMethod('PRINT_TEXT', {'text': 'and Marketing: 03135734950\n', 'size': 18});
       }
 
       await _channel.invokeMethod('LINE_WRAP', {'lines': 4});
@@ -424,4 +469,5 @@ class PrinterService {
        debugPrint("Sunmi Print Error: $e");
     }
   }
+
 }
