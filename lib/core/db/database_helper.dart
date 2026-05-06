@@ -23,7 +23,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 16,
+      version: 17,
       onCreate: _createDB,
       onUpgrade: _onUpgrade,
     );
@@ -52,7 +52,6 @@ class DatabaseHelper {
       await _addColumnIfNotExists(db, 'orders', 'tax_amount', 'REAL DEFAULT 0.0');
       
       await db.execute('CREATE TABLE IF NOT EXISTS settings (id INTEGER PRIMARY KEY, store_name TEXT, store_address TEXT, store_phone TEXT, tax_percentage REAL, footer_message TEXT)');
-      await db.insert('settings', SystemSettings.defaultSettings().toMap());
     }
     if (oldVersion < 8) {
       await _addColumnIfNotExists(db, 'settings', 'custom_charges', 'TEXT');
@@ -81,12 +80,32 @@ class DatabaseHelper {
       await _addColumnIfNotExists(db, 'settings', 'table_font_size', 'INTEGER DEFAULT 24');
       await _addColumnIfNotExists(db, 'settings', 'table_alignment', 'INTEGER DEFAULT 1');
     }
+    if (oldVersion < 17) {
+      await _addSettingsHeaderStyleColumns(db);
+    }
+    await _ensureSettingsRow(db);
   }
 
   Future<void> _addColumnIfNotExists(Database db, String tableName, String columnName, String columnType) async {
     var tableInfo = await db.rawQuery('PRAGMA table_info($tableName)');
     if (!tableInfo.any((column) => column['name'] == columnName)) {
       await db.execute('ALTER TABLE $tableName ADD COLUMN $columnName $columnType');
+    }
+  }
+
+  Future<void> _addSettingsHeaderStyleColumns(Database db) async {
+    await _addColumnIfNotExists(db, 'settings', 'store_name_size', 'INTEGER DEFAULT 36');
+    await _addColumnIfNotExists(db, 'settings', 'store_name_bold', 'INTEGER DEFAULT 1');
+    await _addColumnIfNotExists(db, 'settings', 'store_address_size', 'INTEGER DEFAULT 22');
+    await _addColumnIfNotExists(db, 'settings', 'store_address_bold', 'INTEGER DEFAULT 0');
+    await _addColumnIfNotExists(db, 'settings', 'store_phone_size', 'INTEGER DEFAULT 22');
+    await _addColumnIfNotExists(db, 'settings', 'store_phone_bold', 'INTEGER DEFAULT 0');
+  }
+
+  Future<void> _ensureSettingsRow(Database db) async {
+    final existing = await db.query('settings', where: 'id = ?', whereArgs: [1], limit: 1);
+    if (existing.isEmpty) {
+      await db.insert('settings', SystemSettings.defaultSettings().toMap());
     }
   }
 
@@ -98,7 +117,7 @@ class DatabaseHelper {
     await db.execute('CREATE TABLE orders (id INTEGER PRIMARY KEY AUTOINCREMENT, subtotal REAL DEFAULT 0.0, tax_amount REAL DEFAULT 0.0, charges TEXT, total REAL NOT NULL, created_at TEXT NOT NULL, status TEXT NOT NULL DEFAULT "paid", notes TEXT)');
     await db.execute('CREATE TABLE order_items (id INTEGER PRIMARY KEY AUTOINCREMENT, order_id INTEGER, product_id INTEGER, variant_id INTEGER, product_name TEXT, qty INTEGER, price REAL NOT NULL, notes TEXT, FOREIGN KEY (order_id) REFERENCES orders (id), FOREIGN KEY (product_id) REFERENCES products (id))');
     await db.execute('CREATE TABLE users (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, pin_code TEXT NOT NULL, role TEXT NOT NULL)');
-    await db.execute('CREATE TABLE settings (id INTEGER PRIMARY KEY, store_name TEXT, store_address TEXT, store_phone TEXT, tax_percentage REAL, footer_message TEXT, custom_charges TEXT, customer_printer TEXT DEFAULT "internal", kitchen_printer TEXT DEFAULT "internal", header_items TEXT, footer_items TEXT, table_font_size INTEGER DEFAULT 24, table_alignment INTEGER DEFAULT 1)');
+    await db.execute('CREATE TABLE settings (id INTEGER PRIMARY KEY, store_name TEXT, store_address TEXT, store_phone TEXT, tax_percentage REAL, footer_message TEXT, custom_charges TEXT, customer_printer TEXT DEFAULT "internal", kitchen_printer TEXT DEFAULT "internal", header_items TEXT, footer_items TEXT, table_font_size INTEGER DEFAULT 24, table_alignment INTEGER DEFAULT 1, store_name_size INTEGER DEFAULT 36, store_name_bold INTEGER DEFAULT 1, store_address_size INTEGER DEFAULT 22, store_address_bold INTEGER DEFAULT 0, store_phone_size INTEGER DEFAULT 22, store_phone_bold INTEGER DEFAULT 0)');
     await db.execute('CREATE TABLE product_variants (id INTEGER PRIMARY KEY AUTOINCREMENT, product_id INTEGER NOT NULL, name TEXT NOT NULL, price REAL NOT NULL, stock_qty INTEGER NOT NULL, track_stock INTEGER NOT NULL, FOREIGN KEY (product_id) REFERENCES products (id) ON DELETE CASCADE)');
     await db.execute('CREATE TABLE ingredients (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, stock_qty REAL, unit TEXT, reorder_level REAL)');
     await db.execute('CREATE TABLE product_recipes (id INTEGER PRIMARY KEY AUTOINCREMENT, product_id INTEGER, variant_id INTEGER, ingredient_id INTEGER, quantity REAL, FOREIGN KEY (product_id) REFERENCES products (id) ON DELETE CASCADE, FOREIGN KEY (ingredient_id) REFERENCES ingredients (id) ON DELETE CASCADE)');

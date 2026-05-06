@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 enum ChargeType { percentage, flat }
 
 class CustomCharge {
@@ -74,7 +75,8 @@ class SystemSettings {
   final List<CustomCharge> customCharges;
 
   // Printer Settings
-  final String customerPrinter; // e.g., "internal", "network:192.168.1.100", "usb:DeviceName"
+  final String
+  customerPrinter; // e.g., "internal", "network:192.168.1.100", "usb:DeviceName"
   final String kitchenPrinter;
 
   // Customizable Receipt Settings
@@ -120,7 +122,9 @@ class SystemSettings {
       'store_phone': storePhone,
       'tax_percentage': taxPercentage,
       'footer_message': footerMessage,
-      'custom_charges': jsonEncode(customCharges.map((e) => e.toMap()).toList()),
+      'custom_charges': jsonEncode(
+        customCharges.map((e) => e.toMap()).toList(),
+      ),
       'customer_printer': customerPrinter,
       'kitchen_printer': kitchenPrinter,
       'header_items': jsonEncode(headerItems.map((e) => e.toMap()).toList()),
@@ -160,6 +164,10 @@ class SystemSettings {
       try {
         final List<dynamic> decoded = jsonDecode(map['footer_items']);
         footers = decoded.map((e) => ReceiptItem.fromMap(e)).toList();
+        if (footers.length == 1 &&
+            footers.first.text.trim().toUpperCase() == 'THANK YOU!') {
+          footers = [];
+        }
       } catch (e) {}
     }
 
@@ -168,7 +176,7 @@ class SystemSettings {
       storeAddress: map['store_address'] ?? 'Karachi, Pakistan',
       storePhone: map['store_phone'] ?? '',
       taxPercentage: map['tax_percentage']?.toDouble() ?? 0.0,
-      footerMessage: map['footer_message'] ?? 'Thank you for your visit!',
+      footerMessage: map['footer_message'] ?? '',
       customCharges: charges,
       customerPrinter: map['customer_printer'] ?? 'internal',
       kitchenPrinter: map['kitchen_printer'] ?? 'internal',
@@ -191,14 +199,12 @@ class SystemSettings {
       storeAddress: 'Karachi, Pakistan',
       storePhone: '',
       taxPercentage: 0.0,
-      footerMessage: 'Thank you for your visit!',
+      footerMessage: '',
       customCharges: [],
       customerPrinter: 'internal',
       kitchenPrinter: 'internal',
       headerItems: [],
-      footerItems: [
-        ReceiptItem(text: 'THANK YOU!', fontSize: 24, alignment: 1, isBold: true),
-      ],
+      footerItems: [],
       tableFontSize: 24,
       tableAlignment: 1,
       storeNameSize: 36,
@@ -252,5 +258,3 @@ class SystemSettings {
     );
   }
 }
-
-

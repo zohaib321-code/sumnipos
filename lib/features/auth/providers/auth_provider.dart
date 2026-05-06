@@ -12,17 +12,20 @@ class AuthProvider with ChangeNotifier {
   bool get isAdmin => _role == UserRole.admin;
 
   Future<bool> login(String pin) async {
+    debugPrint('[Auth] Login requested with ${pin.length} digits.');
     final db = await DatabaseHelper.instance.database;
     final List<Map<String, dynamic>> maps = await db.query(
       'users',
       where: 'pin_code = ?',
       whereArgs: [pin],
     );
+    debugPrint('[Auth] Matching users found: ${maps.length}.');
 
     if (maps.isNotEmpty) {
       final user = maps.first;
       _userName = user['name'];
       _role = user['role'] == 'admin' ? UserRole.admin : UserRole.cashier;
+      debugPrint('[Auth] Logged in as $_role.');
       notifyListeners();
       return true;
     }
