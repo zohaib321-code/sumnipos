@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
+import '../../pos/screens/pos_screen.dart';
 import '../../../core/theme/app_theme.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -12,8 +13,10 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   String _pin = '';
+  bool _isVerifying = false;
 
   void _onKeyPress(String value) {
+    if (_isVerifying) return;
     if (_pin.length < 4) {
       setState(() {
         _pin += value;
@@ -33,21 +36,40 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _verifyPin() async {
-    final success = await context.read<AuthProvider>().login(_pin);
+    if (_isVerifying) return;
+    setState(() => _isVerifying = true);
+    debugPrint('[Login] Verifying PIN with ${_pin.length} digits.');
+
+    final auth = context.read<AuthProvider>();
+    final success = await auth.login(_pin);
+    if (!mounted) return;
+
+    if (success) {
+      debugPrint('[Login] PIN accepted. Navigating to POS.');
+      Navigator.of(context).pushAndRemoveUntil(
+        PageRouteBuilder(
+          pageBuilder: (_, __, ___) => const PosScreen(),
+          transitionDuration: Duration.zero,
+          reverseTransitionDuration: Duration.zero,
+        ),
+        (_) => false,
+      );
+      return;
+    }
+
     if (!success) {
       setState(() {
         _pin = '';
+        _isVerifying = false;
       });
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('INVALID PIN', style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1)),
-            backgroundColor: AppTheme.error,
-            behavior: SnackBarBehavior.floating,
-            width: 300,
-          ),
-        );
-      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('INVALID PIN', style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1)),
+          backgroundColor: AppTheme.error,
+          behavior: SnackBarBehavior.floating,
+          width: 300,
+        ),
+      );
     }
   }
 

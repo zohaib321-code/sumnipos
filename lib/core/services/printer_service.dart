@@ -8,23 +8,35 @@ import '../../models/order.dart';
 import '../../models/settings.dart';
 import '../db/database_helper.dart';
 
-enum PrinterType { internal, network, usb }
+enum PrinterType { internal, network, usb, windows }
 
 class PrinterDevice {
   final String name;
   final String address;
   final PrinterType type;
 
-  PrinterDevice({required this.name, required this.address, required this.type});
+  PrinterDevice({
+    required this.name,
+    required this.address,
+    required this.type,
+  });
 
   @override
   String toString() => '${type.name}|$address|$name';
 
   factory PrinterDevice.fromString(String str) {
     final parts = str.split('|');
-    if (parts.length < 3) return PrinterDevice(name: 'Internal', address: 'default', type: PrinterType.internal);
+    if (parts.length < 3)
+      return PrinterDevice(
+        name: 'Internal',
+        address: 'default',
+        type: PrinterType.internal,
+      );
     return PrinterDevice(
-      type: PrinterType.values.firstWhere((e) => e.name == parts[0], orElse: () => PrinterType.internal),
+      type: PrinterType.values.firstWhere(
+        (e) => e.name == parts[0],
+        orElse: () => PrinterType.internal,
+      ),
       address: parts[1],
       name: parts[2],
     );
@@ -33,6 +45,11 @@ class PrinterDevice {
 
 class PrinterService {
   static const MethodChannel _channel = MethodChannel('sunmi_printer');
+  static const MethodChannel _windowsChannel = MethodChannel('windows_printer');
+  static const int _windowsReceiptWidth = 42;
+  static const int _windowsPageWidth = 56;
+
+  static bool get _isWindowsDesktop => !kIsWeb && Platform.isWindows;
 
   static Future<void> init() async {
     if (!kIsWeb && Platform.isAndroid) {
@@ -48,8 +65,19 @@ class PrinterService {
   static Future<List<PrinterDevice>> discoverPrinters() async {
     List<PrinterDevice> devices = [];
 
+    if (_isWindowsDesktop) {
+      final windowsPrinters = await _discoverWindowsPrinters();
+      if (windowsPrinters.isNotEmpty) return windowsPrinters;
+    }
+
     // 1. Add Internal Sunmi Printer
-    devices.add(PrinterDevice(name: "Internal Sunmi Printer", address: "internal", type: PrinterType.internal));
+    devices.add(
+      PrinterDevice(
+        name: "Internal Sunmi Printer",
+        address: "internal",
+        type: PrinterType.internal,
+      ),
+    );
 
     // 2. Network Discovery (Scan port 9100 on common subnets)
     if (!kIsWeb) {
@@ -77,11 +105,18 @@ class PrinterService {
         scans.add(
           Socket.connect(ip, 9100, timeout: const Duration(milliseconds: 700))
               .then((socket) {
-            devices.add(PrinterDevice(name: "Network Printer ($ip)", address: ip, type: PrinterType.network));
-            socket.destroy();
-          }).catchError((_) {
-            // Ignore connection errors
-          }),
+                devices.add(
+                  PrinterDevice(
+                    name: "Network Printer ($ip)",
+                    address: ip,
+                    type: PrinterType.network,
+                  ),
+                );
+                socket.destroy();
+              })
+              .catchError((_) {
+                // Ignore connection errors
+              }),
         );
       }
       await Future.wait(scans);
@@ -90,10 +125,54 @@ class PrinterService {
     return devices;
   }
 
+  static Future<List<PrinterDevice>> _discoverWindowsPrinters() async {
+    try {
+      final printers = await _windowsChannel.invokeMethod<List<dynamic>>(
+        'listPrinters',
+      );
+      if (printers == null) return [];
+
+      return printers
+          .whereType<Map<dynamic, dynamic>>()
+          .map((printer) {
+            final name = printer['name']?.toString() ?? '';
+            final portName = printer['portName']?.toString() ?? '';
+            final isDefault = printer['isDefault'] == true;
+            if (name.isEmpty) return null;
+
+            final details = <String>[
+              if (isDefault) 'Default',
+              if (portName.isNotEmpty) portName,
+            ].join(' - ');
+            final displayName = details.isEmpty ? name : '$name ($details)';
+
+            return PrinterDevice(
+              name: displayName,
+              address: name,
+              type: PrinterType.windows,
+            );
+          })
+          .whereType<PrinterDevice>()
+          .toList();
+    } catch (e) {
+      debugPrint("Windows printer discovery error: $e");
+      return [];
+    }
+  }
+
   static Future<void> printKitchenReceipt(Order order) async {
     final settings = await DatabaseHelper.instance.getSettings();
     final device = PrinterDevice.fromString(settings.kitchenPrinter);
-    
+
+    if (_isWindowsDesktop) {
+      await _printWindows(
+        order,
+        device.type == PrinterType.internal ? '' : device.address,
+        isKitchen: true,
+      );
+      return;
+    }
+
     if (device.type == PrinterType.internal) {
       await _printSunmi(order, isKitchen: true);
     } else if (device.type == PrinterType.network) {
@@ -104,6 +183,15 @@ class PrinterService {
   static Future<void> printCustomerReceipt(Order order) async {
     final settings = await DatabaseHelper.instance.getSettings();
     final device = PrinterDevice.fromString(settings.customerPrinter);
+
+    if (_isWindowsDesktop) {
+      await _printWindows(
+        order,
+        device.type == PrinterType.internal ? '' : device.address,
+        isKitchen: false,
+      );
+      return;
+    }
 
     if (device.type == PrinterType.internal) {
       await _printSunmi(order, isKitchen: false);
@@ -125,56 +213,111 @@ class PrinterService {
     final settings = await DatabaseHelper.instance.getSettings();
     final device = PrinterDevice.fromString(settings.customerPrinter);
 
+    if (_isWindowsDesktop) {
+      await _printWindowsTestReceipt(
+        printerName: device.type == PrinterType.internal ? '' : device.address,
+        storeName: storeName,
+        headerItems: headerItems,
+        footerItems: footerItems,
+      );
+      return;
+    }
+
     if (device.type == PrinterType.internal) {
       try {
         await _channel.invokeMethod('INIT_PRINTER');
-        
+
         // Header
         if (headerItems.isNotEmpty) {
           for (var item in headerItems) {
-            await _channel.invokeMethod('SET_ALIGNMENT', {'alignment': item.alignment});
-            await _channel.invokeMethod('PRINT_TEXT', {'text': '${item.text}\n', 'size': item.fontSize, 'bold': item.isBold});
+            await _channel.invokeMethod('SET_ALIGNMENT', {
+              'alignment': item.alignment,
+            });
+            await _channel.invokeMethod('PRINT_TEXT', {
+              'text': '${item.text}\n',
+              'size': item.fontSize,
+              'bold': item.isBold,
+            });
           }
         } else {
           await _channel.invokeMethod('SET_ALIGNMENT', {'alignment': 1});
-          await _channel.invokeMethod('PRINT_TEXT', {'text': '${storeName.toUpperCase()}\n', 'size': 36, 'bold': true});
+          await _channel.invokeMethod('PRINT_TEXT', {
+            'text': '${storeName.toUpperCase()}\n',
+            'size': 36,
+            'bold': true,
+          });
         }
-        
+
         await _channel.invokeMethod('SET_ALIGNMENT', {'alignment': 1});
-        await _channel.invokeMethod('PRINT_TEXT', {'text': '--- TEST PRINT ---\n', 'size': 20});
-        
+        await _channel.invokeMethod('PRINT_TEXT', {
+          'text': '--- TEST PRINT ---\n',
+          'size': 20,
+        });
+
         // Table
         final tableWidth = _getCharsPerLine(tableFontSize);
-        await _channel.invokeMethod('SET_ALIGNMENT', {'alignment': 0});
-        await _channel.invokeMethod('PRINT_TEXT', {
-          'text': _formatLine('QTY ITEM', 'PRICE', width: tableWidth) + '\n', 
-          'size': tableFontSize, 
-          'bold': true
+        final testDivider = '-' * tableWidth;
+        await _channel.invokeMethod('SET_ALIGNMENT', {
+          'alignment': tableAlignment,
         });
-        await _channel.invokeMethod('PRINT_TEXT', {'text': '--------------------------------\n', 'size': 20});
-        await _channel.invokeMethod('PRINT_TEXT', {'text': _formatLine('1 x TEST ITEM', '100', width: tableWidth) + '\n', 'size': tableFontSize});
-        
+        await _channel.invokeMethod('PRINT_TEXT', {
+          'text': _formatLine('QTY ITEM', 'PRICE', width: tableWidth) + '\n',
+          'size': tableFontSize,
+          'bold': true,
+        });
+        await _channel.invokeMethod('PRINT_TEXT', {
+          'text': '$testDivider\n',
+          'size': 20,
+        });
+        await _channel.invokeMethod('PRINT_TEXT', {
+          'text': _formatLine('1 x TEST ITEM', '100', width: tableWidth) + '\n',
+          'size': tableFontSize,
+        });
+
         // Footer
-        await _channel.invokeMethod('SET_ALIGNMENT', {'alignment': 1});
-        await _channel.invokeMethod('PRINT_TEXT', {'text': '--------------------------------\n', 'size': 20});
-        
+        await _channel.invokeMethod('SET_ALIGNMENT', {
+          'alignment': tableAlignment,
+        });
+        await _channel.invokeMethod('PRINT_TEXT', {
+          'text': '$testDivider\n',
+          'size': 20,
+        });
+
         if (footerItems.isNotEmpty) {
           for (var item in footerItems) {
-            await _channel.invokeMethod('SET_ALIGNMENT', {'alignment': item.alignment});
-            await _channel.invokeMethod('PRINT_TEXT', {'text': '${item.text}\n', 'size': item.fontSize, 'bold': item.isBold});
+            await _channel.invokeMethod('SET_ALIGNMENT', {
+              'alignment': item.alignment,
+            });
+            await _channel.invokeMethod('PRINT_TEXT', {
+              'text': '${item.text}\n',
+              'size': item.fontSize,
+              'bold': item.isBold,
+            });
           }
-        } else {
-          await _channel.invokeMethod('PRINT_TEXT', {'text': 'THANK YOU!\n', 'size': 28, 'bold': true});
         }
+
+        await _channel.invokeMethod('PRINT_TEXT', {
+          'text': 'Developed by Arcade Developers\n',
+          'size': 18,
+          'bold': true,
+        });
+        await _channel.invokeMethod('PRINT_TEXT', {
+          'text': '03135734950\n',
+          'size': 18,
+        });
 
         await _channel.invokeMethod('LINE_WRAP', {'lines': 4});
         await _channel.invokeMethod('CUT_PAPER');
       } catch (e) {
-         debugPrint("Sunmi Print Error: $e");
+        debugPrint("Sunmi Print Error: $e");
       }
     } else if (device.type == PrinterType.network) {
       try {
-        final socket = await Socket.connect(device.address, 9100, timeout: const Duration(seconds: 2));
+        final socket = await Socket.connect(
+          device.address,
+          9100,
+          timeout: const Duration(seconds: 2),
+        );
         socket.add([0x1B, 0x40]);
         socket.add(utf8.encode("\n\nTEST PRINT\nStore: $storeName\n\n\n\n"));
         socket.add([0x1D, 0x56, 0x41, 0x00]);
@@ -186,94 +329,381 @@ class PrinterService {
     }
   }
 
-  static Future<void> _printNetwork(Order order, String ip, {required bool isKitchen}) async {
+  static Future<void> _printWindowsText(String text, String printerName) async {
+    try {
+      await _windowsChannel.invokeMethod('printText', {
+        'printerName': printerName,
+        'text': text,
+      });
+    } catch (e) {
+      debugPrint("Windows Print Error: $e");
+    }
+  }
+
+  static bool _hasCustomFooterMessage(String value) {
+    final text = value.trim();
+    return text.isNotEmpty && text.toLowerCase() != 'thank you for your visit!';
+  }
+
+  static String _alignForWindows(
+    String text,
+    int alignment, {
+    int width = _windowsPageWidth,
+  }) {
+    if (text.length >= width) return text;
+    final spaces = width - text.length;
+    if (alignment == 2) return (' ' * spaces) + text;
+    if (alignment == 1) return (' ' * (spaces ~/ 2)) + text;
+    return text;
+  }
+
+  static void _writeWindowsLine(
+    StringBuffer buffer,
+    String text, {
+    int alignment = 0,
+    int width = _windowsPageWidth,
+  }) {
+    for (final line in text.split('\n')) {
+      buffer.writeln(_alignForWindows(line, alignment, width: width));
+    }
+  }
+
+  static void _writeWindowsTableLine(StringBuffer buffer, String text) {
+    _writeWindowsLine(buffer, text, alignment: 1, width: _windowsPageWidth);
+  }
+
+  static Future<void> _printWindowsTestReceipt({
+    required String printerName,
+    required String storeName,
+    required List<ReceiptItem> headerItems,
+    required List<ReceiptItem> footerItems,
+  }) async {
+    final buffer = StringBuffer();
+
+    if (headerItems.isNotEmpty) {
+      for (final item in headerItems) {
+        _writeWindowsLine(buffer, item.text, alignment: item.alignment);
+      }
+    } else if (storeName.isNotEmpty) {
+      _writeWindowsLine(buffer, storeName.toUpperCase(), alignment: 1);
+    }
+
+    _writeWindowsLine(buffer, '--- TEST PRINT ---', alignment: 1);
+    _writeWindowsTableLine(
+      buffer,
+      _formatLine('QTY  ITEM', 'PRICE', width: _windowsReceiptWidth),
+    );
+    _writeWindowsTableLine(buffer, '-' * _windowsReceiptWidth);
+    _writeWindowsTableLine(
+      buffer,
+      _formatLine('1 x TEST ITEM', '100', width: _windowsReceiptWidth),
+    );
+    _writeWindowsTableLine(buffer, '-' * _windowsReceiptWidth);
+
+    if (footerItems.isNotEmpty) {
+      for (final item in footerItems) {
+        _writeWindowsLine(buffer, item.text, alignment: item.alignment);
+      }
+    }
+
+    _writeWindowsLine(buffer, 'Developed by Arcade Developers', alignment: 1);
+    _writeWindowsLine(buffer, '03135734950', alignment: 1);
+
+    await _printWindowsText(buffer.toString(), printerName);
+  }
+
+  static Future<void> _printWindows(
+    Order order,
+    String printerName, {
+    required bool isKitchen,
+  }) async {
     try {
       final settings = await DatabaseHelper.instance.getSettings();
       final formatter = DateFormat('yyyy-MM-dd HH:mm');
-      const String divider = '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
-      final socket = await Socket.connect(ip, 9100, timeout: const Duration(seconds: 2));
-      
-      socket.add([0x1B, 0x40]); 
+      final String divider = '-' * _windowsReceiptWidth;
+      final buffer = StringBuffer();
+
+      if (!isKitchen) {
+        if (settings.headerItems.isNotEmpty) {
+          for (final item in settings.headerItems) {
+            _writeWindowsLine(buffer, item.text, alignment: item.alignment);
+          }
+        } else {
+          if (settings.storeName.isNotEmpty) {
+            _writeWindowsLine(
+              buffer,
+              settings.storeName.toUpperCase(),
+              alignment: 1,
+            );
+          }
+          if (settings.storeAddress.isNotEmpty) {
+            _writeWindowsLine(buffer, settings.storeAddress, alignment: 1);
+          }
+          if (settings.storePhone.isNotEmpty) {
+            _writeWindowsLine(
+              buffer,
+              "TEL: ${settings.storePhone}",
+              alignment: 1,
+            );
+          }
+        }
+        _writeWindowsTableLine(buffer, divider);
+      }
+
+      _writeWindowsLine(
+        buffer,
+        isKitchen ? "KITCHEN ORDER" : "CUSTOMER RECEIPT",
+        alignment: 1,
+      );
+      _writeWindowsLine(buffer, "Order: #${order.id}", alignment: 1);
+      _writeWindowsLine(
+        buffer,
+        "Date: ${formatter.format(order.dateTime)}",
+        alignment: 1,
+      );
+      _writeWindowsTableLine(buffer, divider);
+
+      const width = _windowsReceiptWidth;
+      if (!isKitchen) {
+        _writeWindowsTableLine(
+          buffer,
+          _formatLine('QTY  ITEM', 'PRICE', width: width),
+        );
+      } else {
+        _writeWindowsTableLine(buffer, "QTY  ITEM");
+      }
+
+      for (var item in order.items) {
+        if (isKitchen) {
+          _writeWindowsTableLine(
+            buffer,
+            "${item.quantity} x ${item.productName}",
+          );
+          if (item.notes != null && item.notes!.isNotEmpty) {
+            _writeWindowsTableLine(buffer, "   * Note: ${item.notes}");
+          }
+        } else {
+          String name = item.productName;
+          String price = item.price.toStringAsFixed(0);
+          String qtyLine = '${item.quantity} x ';
+          int maxName = width - qtyLine.length - price.length - 2;
+
+          if (maxName > 0 && name.length > maxName) {
+            _writeWindowsTableLine(
+              buffer,
+              qtyLine + name.substring(0, maxName),
+            );
+            _writeWindowsTableLine(
+              buffer,
+              _formatLine('  ' + name.substring(maxName), price, width: width),
+            );
+          } else {
+            _writeWindowsTableLine(
+              buffer,
+              _formatLine(qtyLine + name, price, width: width),
+            );
+          }
+        }
+      }
+
+      if (!isKitchen) {
+        _writeWindowsTableLine(buffer, divider);
+        _writeWindowsTableLine(
+          buffer,
+          _formatLine(
+            'SUBTOTAL',
+            order.subtotal.toStringAsFixed(0),
+            width: width,
+          ),
+        );
+        for (var charge in order.charges) {
+          String label = charge.percentage > 0
+              ? '${charge.name.toUpperCase()} (${charge.percentage.toStringAsFixed(0)}%)'
+              : charge.name.toUpperCase();
+          _writeWindowsTableLine(
+            buffer,
+            _formatLine(label, charge.amount.toStringAsFixed(0), width: width),
+          );
+        }
+        _writeWindowsTableLine(buffer, divider);
+        _writeWindowsTableLine(
+          buffer,
+          _formatLine(
+            'TOTAL',
+            'Rs. ${order.totalAmount.toStringAsFixed(0)}',
+            width: width,
+          ),
+        );
+        _writeWindowsTableLine(buffer, divider);
+        if (settings.footerItems.isNotEmpty) {
+          for (final item in settings.footerItems) {
+            _writeWindowsLine(buffer, item.text, alignment: item.alignment);
+          }
+        } else if (_hasCustomFooterMessage(settings.footerMessage)) {
+          _writeWindowsLine(buffer, settings.footerMessage, alignment: 1);
+        }
+        _writeWindowsTableLine(buffer, divider);
+        _writeWindowsLine(
+          buffer,
+          "Developed by Arcade Developers",
+          alignment: 1,
+        );
+        _writeWindowsLine(buffer, "03135734950", alignment: 1);
+      }
+
+      await _printWindowsText(buffer.toString(), printerName);
+    } catch (e) {
+      debugPrint("Windows Print Error: $e");
+    }
+  }
+
+  static Future<void> _printNetwork(
+    Order order,
+    String ip, {
+    required bool isKitchen,
+  }) async {
+    try {
+      final settings = await DatabaseHelper.instance.getSettings();
+      final formatter = DateFormat('yyyy-MM-dd HH:mm');
+      const int width = 32;
+      final String divider = '${'-' * width}\n';
+      final socket = await Socket.connect(
+        ip,
+        9100,
+        timeout: const Duration(seconds: 2),
+      );
+
+      socket.add([0x1B, 0x40]);
       socket.add([0x1B, 0x61, 0x01]);
 
       if (!isKitchen) {
         if (settings.storeName.isNotEmpty) {
-          socket.add(settings.storeNameBold ? [0x1B, 0x21, 0x38] : [0x1B, 0x21, 0x30]);
+          socket.add(
+            settings.storeNameBold ? [0x1B, 0x21, 0x38] : [0x1B, 0x21, 0x30],
+          );
           socket.add(utf8.encode("${settings.storeName.toUpperCase()}\n"));
         }
         if (settings.storeAddress.isNotEmpty) {
-          socket.add(settings.storeAddressBold ? [0x1B, 0x21, 0x08] : [0x1B, 0x21, 0x00]);
+          socket.add(
+            settings.storeAddressBold ? [0x1B, 0x21, 0x08] : [0x1B, 0x21, 0x00],
+          );
           socket.add(utf8.encode("${settings.storeAddress}\n"));
         }
         if (settings.storePhone.isNotEmpty) {
-          socket.add(settings.storePhoneBold ? [0x1B, 0x21, 0x08] : [0x1B, 0x21, 0x00]);
+          socket.add(
+            settings.storePhoneBold ? [0x1B, 0x21, 0x08] : [0x1B, 0x21, 0x00],
+          );
           socket.add(utf8.encode("TEL: ${settings.storePhone}\n"));
         }
         socket.add(utf8.encode(divider));
       }
 
       socket.add([0x1B, 0x21, 0x08]);
-      socket.add(utf8.encode(isKitchen ? "KITCHEN ORDER\n" : "CUSTOMER RECEIPT\n"));
+      socket.add(
+        utf8.encode(isKitchen ? "KITCHEN ORDER\n" : "CUSTOMER RECEIPT\n"),
+      );
       socket.add([0x1B, 0x21, 0x00]);
       socket.add(utf8.encode("Order: #${order.id}\n"));
       socket.add(utf8.encode("Date: ${formatter.format(order.dateTime)}\n"));
-      
-      socket.add([0x1B, 0x61, 0x00]);
+
+      socket.add([0x1B, 0x61, isKitchen ? 0x00 : settings.tableAlignment]);
       socket.add(utf8.encode(divider));
 
-      final width = _getCharsPerLine(24);
       if (!isKitchen) {
-        socket.add(utf8.encode(_formatLine('QTY  ITEM', 'PRICE', width: width) + '\n'));
+        socket.add(
+          utf8.encode(_formatLine('QTY  ITEM', 'PRICE', width: width) + '\n'),
+        );
       } else {
         socket.add(utf8.encode("QTY  ITEM\n"));
       }
 
       for (var item in order.items) {
-         if (isKitchen) {
-           socket.add([0x1B, 0x21, 0x08]);
-           socket.add(utf8.encode("${item.quantity} x ${item.productName}\n"));
-           socket.add([0x1B, 0x21, 0x00]);
-           if (item.notes != null && item.notes!.isNotEmpty) {
-              socket.add(utf8.encode("   * Note: ${item.notes}\n"));
-           }
-         } else {
-            String name = item.productName;
-            String price = item.price.toStringAsFixed(0);
-            String qtyLine = '${item.quantity} x ';
-            int maxName = width - qtyLine.length - price.length - 2;
-            
-            if (name.length > maxName) {
-              socket.add(utf8.encode(qtyLine + name.substring(0, maxName) + '\n'));
-              socket.add(utf8.encode(_formatLine('  ' + name.substring(maxName), price, width: width) + '\n'));
-            } else {
-              socket.add(utf8.encode(_formatLine(qtyLine + name, price, width: width) + '\n'));
-            }
-         }
+        if (isKitchen) {
+          socket.add([0x1B, 0x21, 0x08]);
+          socket.add(utf8.encode("${item.quantity} x ${item.productName}\n"));
+          socket.add([0x1B, 0x21, 0x00]);
+          if (item.notes != null && item.notes!.isNotEmpty) {
+            socket.add(utf8.encode("   * Note: ${item.notes}\n"));
+          }
+        } else {
+          String name = item.productName;
+          String price = item.price.toStringAsFixed(0);
+          String qtyLine = '${item.quantity} x ';
+          int maxName = width - qtyLine.length - price.length - 2;
+
+          if (name.length > maxName) {
+            socket.add(
+              utf8.encode(qtyLine + name.substring(0, maxName) + '\n'),
+            );
+            socket.add(
+              utf8.encode(
+                _formatLine(
+                      '  ' + name.substring(maxName),
+                      price,
+                      width: width,
+                    ) +
+                    '\n',
+              ),
+            );
+          } else {
+            socket.add(
+              utf8.encode(
+                _formatLine(qtyLine + name, price, width: width) + '\n',
+              ),
+            );
+          }
+        }
       }
 
       if (!isKitchen) {
-        socket.add([0x1B, 0x61, 0x01]);
+        socket.add([0x1B, 0x61, settings.tableAlignment]);
         socket.add(utf8.encode(divider));
-        socket.add([0x1B, 0x61, 0x00]);
-        socket.add(utf8.encode(_formatLine('SUBTOTAL', order.subtotal.toStringAsFixed(0), width: width) + '\n'));
+        socket.add([0x1B, 0x61, settings.tableAlignment]);
+        socket.add(
+          utf8.encode(
+            _formatLine(
+                  'SUBTOTAL',
+                  order.subtotal.toStringAsFixed(0),
+                  width: width,
+                ) +
+                '\n',
+          ),
+        );
         for (var charge in order.charges) {
-           String label = charge.percentage > 0 
-               ? '${charge.name.toUpperCase()} (${charge.percentage.toStringAsFixed(0)}%)'
-               : charge.name.toUpperCase();
-           socket.add(utf8.encode(_formatLine(label, charge.amount.toStringAsFixed(0), width: width) + '\n'));
+          String label = charge.percentage > 0
+              ? '${charge.name.toUpperCase()} (${charge.percentage.toStringAsFixed(0)}%)'
+              : charge.name.toUpperCase();
+          socket.add(
+            utf8.encode(
+              _formatLine(
+                    label,
+                    charge.amount.toStringAsFixed(0),
+                    width: width,
+                  ) +
+                  '\n',
+            ),
+          );
         }
         socket.add(utf8.encode(divider));
-        socket.add([0x1B, 0x21, 0x10]);
-        socket.add(utf8.encode(_formatLine('TOTAL', 'Rs. ${order.totalAmount.toStringAsFixed(0)}', width: _getCharsPerLine(32)) + '\n'));
+        socket.add([0x1B, 0x21, 0x08]);
+        socket.add(
+          utf8.encode(
+            _formatLine(
+                  'TOTAL',
+                  'Rs. ${order.totalAmount.toStringAsFixed(0)}',
+                  width: width,
+                ) +
+                '\n',
+          ),
+        );
         socket.add([0x1B, 0x21, 0x00]);
         socket.add([0x1B, 0x61, 0x01]);
         socket.add(utf8.encode(divider));
-        if (settings.footerMessage.isNotEmpty) {
+        if (_hasCustomFooterMessage(settings.footerMessage)) {
           socket.add(utf8.encode("${settings.footerMessage}\n"));
         }
-        socket.add(utf8.encode("THANK YOU!\n"));
         socket.add(utf8.encode("Developed by Arcade Developers\n"));
-        socket.add(utf8.encode("and Marketing: 03135734950\n"));
+        socket.add(utf8.encode("03135734950\n"));
       }
 
       socket.add(utf8.encode("\n\n\n\n"));
@@ -300,174 +730,256 @@ class PrinterService {
     return left + (' ' * spaces) + rightStr;
   }
 
-  static Future<void> _printSunmi(Order order, {required bool isKitchen}) async {
+  static Future<void> _printSunmi(
+    Order order, {
+    required bool isKitchen,
+  }) async {
     try {
       final settings = await DatabaseHelper.instance.getSettings();
       final formatter = DateFormat('yyyy-MM-dd HH:mm');
-      const String divider = '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━';
+      final int tableWidth = isKitchen
+          ? 32
+          : _getCharsPerLine(settings.tableFontSize);
+      final String divider = '-' * tableWidth;
 
       await _channel.invokeMethod('INIT_PRINTER');
-      
+
       if (!isKitchen) {
         if (settings.headerItems.isNotEmpty) {
           for (var item in settings.headerItems) {
-            await _channel.invokeMethod('SET_ALIGNMENT', {'alignment': item.alignment});
+            await _channel.invokeMethod('SET_ALIGNMENT', {
+              'alignment': item.alignment,
+            });
             await _channel.invokeMethod('PRINT_TEXT', {
-              'text': '${item.text}\n', 
+              'text': '${item.text}\n',
               'size': item.fontSize,
-              'bold': item.isBold
+              'bold': item.isBold,
             });
           }
         } else {
           await _channel.invokeMethod('SET_ALIGNMENT', {'alignment': 1});
           if (settings.storeName.isNotEmpty) {
             await _channel.invokeMethod('PRINT_TEXT', {
-              'text': '${settings.storeName.toUpperCase()}\n', 
-              'size': settings.storeNameSize, 
-              'bold': settings.storeNameBold
+              'text': '${settings.storeName.toUpperCase()}\n',
+              'size': settings.storeNameSize,
+              'bold': settings.storeNameBold,
             });
           }
           if (settings.storeAddress.isNotEmpty) {
             await _channel.invokeMethod('PRINT_TEXT', {
-              'text': '${settings.storeAddress}\n', 
+              'text': '${settings.storeAddress}\n',
               'size': settings.storeAddressSize,
-              'bold': settings.storeAddressBold
+              'bold': settings.storeAddressBold,
             });
           }
           if (settings.storePhone.isNotEmpty) {
             await _channel.invokeMethod('PRINT_TEXT', {
-              'text': 'TEL: ${settings.storePhone}\n', 
+              'text': 'TEL: ${settings.storePhone}\n',
               'size': settings.storePhoneSize,
-              'bold': settings.storePhoneBold
+              'bold': settings.storePhoneBold,
             });
           }
         }
         await _channel.invokeMethod('SET_ALIGNMENT', {'alignment': 1});
-        await _channel.invokeMethod('PRINT_TEXT', {'text': '$divider\n', 'size': 20});
+        await _channel.invokeMethod('PRINT_TEXT', {
+          'text': '$divider\n',
+          'size': 20,
+        });
       }
 
       await _channel.invokeMethod('SET_ALIGNMENT', {'alignment': 1});
       await _channel.invokeMethod('PRINT_TEXT', {
-        'text': isKitchen ? 'KITCHEN ORDER\n' : 'CUSTOMER RECEIPT\n', 
+        'text': isKitchen ? 'KITCHEN ORDER\n' : 'CUSTOMER RECEIPT\n',
         'size': 32,
-        'bold': true
+        'bold': true,
       });
-      await _channel.invokeMethod('PRINT_TEXT', {'text': 'Order: #${order.id}\n', 'size': 24});
-      await _channel.invokeMethod('PRINT_TEXT', {'text': 'Date: ${formatter.format(order.dateTime)}\n', 'size': 24});
-      
-      await _channel.invokeMethod('SET_ALIGNMENT', {'alignment': 0});
-      await _channel.invokeMethod('PRINT_TEXT', {'text': '$divider\n', 'size': 20});
+      await _channel.invokeMethod('PRINT_TEXT', {
+        'text': 'Order: #${order.id}\n',
+        'size': 24,
+      });
+      await _channel.invokeMethod('PRINT_TEXT', {
+        'text': 'Date: ${formatter.format(order.dateTime)}\n',
+        'size': 24,
+      });
 
-      final int tableWidth = _getCharsPerLine(settings.tableFontSize);
+      await _channel.invokeMethod('SET_ALIGNMENT', {
+        'alignment': isKitchen ? 0 : settings.tableAlignment,
+      });
+      await _channel.invokeMethod('PRINT_TEXT', {
+        'text': '$divider\n',
+        'size': 20,
+      });
+
       if (!isKitchen) {
-        await _channel.invokeMethod('SET_ALIGNMENT', {'alignment': settings.tableAlignment});
+        await _channel.invokeMethod('SET_ALIGNMENT', {
+          'alignment': settings.tableAlignment,
+        });
         await _channel.invokeMethod('PRINT_TEXT', {
-          'text': _formatLine('QTY  ITEM', 'PRICE', width: tableWidth) + '\n', 
+          'text': _formatLine('QTY  ITEM', 'PRICE', width: tableWidth) + '\n',
           'size': settings.tableFontSize,
-          'bold': true
+          'bold': true,
         });
       } else {
         await _channel.invokeMethod('SET_ALIGNMENT', {'alignment': 0});
-        await _channel.invokeMethod('PRINT_TEXT', {'text': 'QTY  ITEM\n', 'size': 28, 'bold': true});
+        await _channel.invokeMethod('PRINT_TEXT', {
+          'text': 'QTY  ITEM\n',
+          'size': 28,
+          'bold': true,
+        });
       }
-      
+
       for (var item in order.items) {
         if (isKitchen) {
-          await _channel.invokeMethod('PRINT_TEXT', {'text': '${item.quantity} x ${item.productName}\n', 'size': 32, 'bold': true});
+          await _channel.invokeMethod('PRINT_TEXT', {
+            'text': '${item.quantity} x ${item.productName}\n',
+            'size': 32,
+            'bold': true,
+          });
           if (item.notes != null && item.notes!.isNotEmpty) {
-             await _channel.invokeMethod('PRINT_TEXT', {'text': '   * Note: ${item.notes}\n', 'size': 24});
+            await _channel.invokeMethod('PRINT_TEXT', {
+              'text': '   * Note: ${item.notes}\n',
+              'size': 24,
+            });
           }
         } else {
-           String qtyPrefix = '${item.quantity} x ';
-           String name = item.productName;
-           String price = item.price.toStringAsFixed(0);
-           
-           int reservedForPrice = price.length + 2; 
-           int firstLineMax = tableWidth - qtyPrefix.length - reservedForPrice;
-           
-           if (name.length <= firstLineMax) {
-             await _channel.invokeMethod('PRINT_TEXT', {
-               'text': _formatLine(qtyPrefix + name, price, width: tableWidth) + '\n', 
-               'size': settings.tableFontSize
-             });
-           } else {
-             String firstLineName = name.substring(0, firstLineMax);
-             String remainingName = name.substring(firstLineMax);
-             
-             await _channel.invokeMethod('PRINT_TEXT', {
-               'text': qtyPrefix + firstLineName + '\n', 
-               'size': settings.tableFontSize
-             });
-             
-             await _channel.invokeMethod('PRINT_TEXT', {
-               'text': _formatLine('  ' + remainingName, price, width: tableWidth) + '\n', 
-               'size': settings.tableFontSize
-             });
-           }
+          String qtyPrefix = '${item.quantity} x ';
+          String name = item.productName;
+          String price = item.price.toStringAsFixed(0);
+
+          int reservedForPrice = price.length + 2;
+          int firstLineMax = tableWidth - qtyPrefix.length - reservedForPrice;
+
+          if (name.length <= firstLineMax) {
+            await _channel.invokeMethod('PRINT_TEXT', {
+              'text':
+                  _formatLine(qtyPrefix + name, price, width: tableWidth) +
+                  '\n',
+              'size': settings.tableFontSize,
+            });
+          } else {
+            String firstLineName = name.substring(0, firstLineMax);
+            String remainingName = name.substring(firstLineMax);
+
+            await _channel.invokeMethod('PRINT_TEXT', {
+              'text': qtyPrefix + firstLineName + '\n',
+              'size': settings.tableFontSize,
+            });
+
+            await _channel.invokeMethod('PRINT_TEXT', {
+              'text':
+                  _formatLine('  ' + remainingName, price, width: tableWidth) +
+                  '\n',
+              'size': settings.tableFontSize,
+            });
+          }
         }
       }
 
       if (!isKitchen) {
-        await _channel.invokeMethod('SET_ALIGNMENT', {'alignment': 1});
-        await _channel.invokeMethod('PRINT_TEXT', {'text': '$divider\n', 'size': 20});
-        
-        await _channel.invokeMethod('SET_ALIGNMENT', {'alignment': 0});
-        await _channel.invokeMethod('PRINT_TEXT', {
-          'text': _formatLine('SUBTOTAL', order.subtotal.toStringAsFixed(0), width: tableWidth) + '\n', 
-          'size': settings.tableFontSize
+        await _channel.invokeMethod('SET_ALIGNMENT', {
+          'alignment': settings.tableAlignment,
         });
-        
+        await _channel.invokeMethod('PRINT_TEXT', {
+          'text': '$divider\n',
+          'size': 20,
+        });
+
+        await _channel.invokeMethod('SET_ALIGNMENT', {
+          'alignment': settings.tableAlignment,
+        });
+        await _channel.invokeMethod('PRINT_TEXT', {
+          'text':
+              _formatLine(
+                'SUBTOTAL',
+                order.subtotal.toStringAsFixed(0),
+                width: tableWidth,
+              ) +
+              '\n',
+          'size': settings.tableFontSize,
+        });
+
         for (var charge in order.charges) {
-           String label = charge.percentage > 0 
-               ? '${charge.name.toUpperCase()} (${charge.percentage.toStringAsFixed(0)}%)'
-               : charge.name.toUpperCase();
-           await _channel.invokeMethod('PRINT_TEXT', {
-             'text': _formatLine(label, charge.amount.toStringAsFixed(0), width: tableWidth) + '\n', 
-             'size': settings.tableFontSize
-           });
+          String label = charge.percentage > 0
+              ? '${charge.name.toUpperCase()} (${charge.percentage.toStringAsFixed(0)}%)'
+              : charge.name.toUpperCase();
+          await _channel.invokeMethod('PRINT_TEXT', {
+            'text':
+                _formatLine(
+                  label,
+                  charge.amount.toStringAsFixed(0),
+                  width: tableWidth,
+                ) +
+                '\n',
+            'size': settings.tableFontSize,
+          });
         }
-        
-        await _channel.invokeMethod('PRINT_TEXT', {'text': '$divider\n', 'size': 20});
-        
-        int totalWidth = _getCharsPerLine(36);
+
         await _channel.invokeMethod('PRINT_TEXT', {
-          'text': _formatLine('TOTAL', 'Rs. ${order.totalAmount.toStringAsFixed(0)}', width: totalWidth) + '\n', 
-          'size': 36,
-          'bold': true
+          'text': '$divider\n',
+          'size': 20,
         });
-        
-        await _channel.invokeMethod('SET_ALIGNMENT', {'alignment': 1});
-        await _channel.invokeMethod('PRINT_TEXT', {'text': '$divider\n', 'size': 20});
-        
+
+        await _channel.invokeMethod('PRINT_TEXT', {
+          'text':
+              _formatLine(
+                'TOTAL',
+                'Rs. ${order.totalAmount.toStringAsFixed(0)}',
+                width: tableWidth,
+              ) +
+              '\n',
+          'size': settings.tableFontSize,
+          'bold': true,
+        });
+
+        await _channel.invokeMethod('SET_ALIGNMENT', {
+          'alignment': settings.tableAlignment,
+        });
+        await _channel.invokeMethod('PRINT_TEXT', {
+          'text': '$divider\n',
+          'size': 20,
+        });
+
         if (settings.footerItems.isNotEmpty) {
           for (var item in settings.footerItems) {
-            await _channel.invokeMethod('SET_ALIGNMENT', {'alignment': item.alignment});
+            await _channel.invokeMethod('SET_ALIGNMENT', {
+              'alignment': item.alignment,
+            });
             await _channel.invokeMethod('PRINT_TEXT', {
-              'text': '${item.text}\n', 
+              'text': '${item.text}\n',
               'size': item.fontSize,
-              'bold': item.isBold
+              'bold': item.isBold,
             });
           }
         } else {
           // Default Footer
-          if (settings.footerMessage.isNotEmpty) {
-            await _channel.invokeMethod('PRINT_TEXT', {'text': '${settings.footerMessage}\n', 'size': 22});
+          if (_hasCustomFooterMessage(settings.footerMessage)) {
+            await _channel.invokeMethod('PRINT_TEXT', {
+              'text': '${settings.footerMessage}\n',
+              'size': 22,
+            });
           }
-          await _channel.invokeMethod('PRINT_TEXT', {'text': 'THANK YOU!\n', 'size': 28, 'bold': true});
         }
 
         // --- FINAL ARCADE BRANDING ---
         await _channel.invokeMethod('SET_ALIGNMENT', {'alignment': 1});
-        await _channel.invokeMethod('PRINT_TEXT', {'text': '$divider\n', 'size': 20});
-        await _channel.invokeMethod('PRINT_TEXT', {'text': 'Developed by Arcade Developers\n', 'size': 18});
-        await _channel.invokeMethod('PRINT_TEXT', {'text': 'and Marketing: 03135734950\n', 'size': 18});
+        await _channel.invokeMethod('PRINT_TEXT', {
+          'text': '$divider\n',
+          'size': 20,
+        });
+        await _channel.invokeMethod('PRINT_TEXT', {
+          'text': 'Developed by Arcade Developers\n',
+          'size': 18,
+        });
+        await _channel.invokeMethod('PRINT_TEXT', {
+          'text': '03135734950\n',
+          'size': 18,
+        });
       }
 
       await _channel.invokeMethod('LINE_WRAP', {'lines': 4});
       await _channel.invokeMethod('CUT_PAPER');
     } catch (e) {
-       debugPrint("Sunmi Print Error: $e");
+      debugPrint("Sunmi Print Error: $e");
     }
   }
-
 }
