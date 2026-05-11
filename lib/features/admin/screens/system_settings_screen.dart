@@ -6,6 +6,8 @@ import '../../../core/theme/app_theme.dart';
 import 'package:provider/provider.dart';
 import '../../pos/providers/cart_provider.dart';
 import '../../../core/services/printer_service.dart';
+import '../../../core/services/cash_drawer_service.dart';
+import '../../../models/drawer_log.dart';
 
 class SystemSettingsScreen extends StatefulWidget {
   const SystemSettingsScreen({super.key});
@@ -597,6 +599,31 @@ class _SystemSettingsScreenState extends State<SystemSettingsScreen> {
                           icon: const Icon(Icons.print, size: 20),
                           label: const Text(
                             'TEST PRINT',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 1,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 56,
+                        child: OutlinedButton.icon(
+                          onPressed: () async {
+                            final ok = await CashDrawerService.open(reason: DrawerLog.reasonTest);
+                            if (!mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(ok ? 'Drawer pulse sent' : 'No drawer detected (signal sent anyway)'),
+                                duration: const Duration(seconds: 2),
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.point_of_sale, size: 20),
+                          label: const Text(
+                            'TEST CASH DRAWER',
                             style: TextStyle(
                               fontWeight: FontWeight.w900,
                               letterSpacing: 1,

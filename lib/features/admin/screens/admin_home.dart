@@ -8,6 +8,7 @@ import './admin_sales_screen.dart';
 import './system_settings_screen.dart';
 import './ingredient_management_screen.dart';
 import './admin_stats_screen.dart';
+import './drawer_log_screen.dart';
 import 'package:sunmi_pos/core/theme/app_theme.dart';
 
 class AdminHomeScreen extends StatelessWidget {
@@ -98,6 +99,13 @@ class AdminHomeScreen extends StatelessWidget {
                   icon: Icons.analytics_outlined,
                   color: Colors.deepOrange,
                   onTap: () => _nav(context, const AdminStatsScreen()),
+                ),
+                _AdminBox(
+                  title: 'CASH DRAWER',
+                  subtitle: 'Open Log',
+                  icon: Icons.point_of_sale,
+                  color: AppTheme.warning,
+                  onTap: () => _nav(context, const DrawerLogScreen()),
                 ),
               ],
             ),

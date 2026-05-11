@@ -2,6 +2,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import '../../models/order.dart';
 import '../../models/settings.dart';
+import '../../models/drawer_log.dart';
 import 'dart:developer' as dev;
 import 'dart:convert';
 
@@ -23,7 +24,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 17,
+      version: 18,
       onCreate: _createDB,
       onUpgrade: _onUpgrade,
     );
@@ -83,6 +84,9 @@ class DatabaseHelper {
     if (oldVersion < 17) {
       await _addSettingsHeaderStyleColumns(db);
     }
+    if (oldVersion < 18) {
+      await db.execute('CREATE TABLE IF NOT EXISTS drawer_log (id INTEGER PRIMARY KEY AUTOINCREMENT, timestamp TEXT NOT NULL, reason TEXT NOT NULL, order_id INTEGER)');
+    }
     await _ensureSettingsRow(db);
   }
 
@@ -121,6 +125,7 @@ class DatabaseHelper {
     await db.execute('CREATE TABLE product_variants (id INTEGER PRIMARY KEY AUTOINCREMENT, product_id INTEGER NOT NULL, name TEXT NOT NULL, price REAL NOT NULL, stock_qty INTEGER NOT NULL, track_stock INTEGER NOT NULL, FOREIGN KEY (product_id) REFERENCES products (id) ON DELETE CASCADE)');
     await db.execute('CREATE TABLE ingredients (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, stock_qty REAL, unit TEXT, reorder_level REAL)');
     await db.execute('CREATE TABLE product_recipes (id INTEGER PRIMARY KEY AUTOINCREMENT, product_id INTEGER, variant_id INTEGER, ingredient_id INTEGER, quantity REAL, FOREIGN KEY (product_id) REFERENCES products (id) ON DELETE CASCADE, FOREIGN KEY (ingredient_id) REFERENCES ingredients (id) ON DELETE CASCADE)');
+    await db.execute('CREATE TABLE drawer_log (id INTEGER PRIMARY KEY AUTOINCREMENT, timestamp TEXT NOT NULL, reason TEXT NOT NULL, order_id INTEGER)');
 
     await _seedData(db);
   }
@@ -317,6 +322,42 @@ class DatabaseHelper {
     final items = (await db.query('order_items', where: 'order_id = ?', whereArgs: [id]))
         .map((e) => OrderItem.fromMap(e)).toList();
     return Order.fromMap(maps.first, items);
+  }
+
+  Future<int> insertDrawerLog(DrawerLog log) async {
+    final db = await instance.database;
+    return await db.insert('drawer_log', log.toMap());
+  }
+
+  Future<List<DrawerLog>> getDrawerLogs({
+    DateTime? from,
+    DateTime? to,
+    String? reason,
+    int limit = 500,
+  }) async {
+    final db = await instance.database;
+    final List<String> wheres = [];
+    final List<dynamic> args = [];
+    if (from != null) {
+      wheres.add('timestamp >= ?');
+      args.add(from.toIso8601String());
+    }
+    if (to != null) {
+      wheres.add('timestamp <= ?');
+      args.add(to.toIso8601String());
+    }
+    if (reason != null && reason.isNotEmpty) {
+      wheres.add('reason = ?');
+      args.add(reason);
+    }
+    final result = await db.query(
+      'drawer_log',
+      where: wheres.isEmpty ? null : wheres.join(' AND '),
+      whereArgs: wheres.isEmpty ? null : args,
+      orderBy: 'id DESC',
+      limit: limit,
+    );
+    return result.map(DrawerLog.fromMap).toList();
   }
 
   Future<void> wipeAndSeedEverything() async {

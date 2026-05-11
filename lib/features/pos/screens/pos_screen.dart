@@ -8,6 +8,8 @@ import '../../auth/widgets/pin_dialog.dart';
 import '../../admin/screens/admin_home.dart';
 import '../../admin/screens/order_history_screen.dart';
 import '../../products/providers/category_provider.dart';
+import '../../../core/services/cash_drawer_service.dart';
+import '../../../models/drawer_log.dart';
 import 'package:sunmi_pos/core/theme/app_theme.dart';
 
 class PosScreen extends StatefulWidget {
@@ -58,6 +60,45 @@ class _PosScreenState extends State<PosScreen> {
     );
   }
 
+  Future<void> _confirmOpenDrawer() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+        title: const Text('OPEN CASH DRAWER?', style: TextStyle(fontWeight: FontWeight.w800, letterSpacing: 0.8)),
+        content: const Text('This will open the cash drawer and log the action. Continue?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('CANCEL', style: TextStyle(fontWeight: FontWeight.w700)),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.primary,
+              foregroundColor: Colors.white,
+              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+              elevation: 0,
+            ),
+            child: const Text('OPEN DRAWER', style: TextStyle(fontWeight: FontWeight.w800)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    final ok = await CashDrawerService.open(reason: DrawerLog.reasonManual);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(ok ? 'Cash drawer opened' : 'Drawer signal sent (no drawer connected?)'),
+        backgroundColor: ok ? AppTheme.primary : AppTheme.textMuted,
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
   void _viewOrderHistory() {
     Navigator.push(
       context,
@@ -82,6 +123,12 @@ class _PosScreenState extends State<PosScreen> {
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
+                IconButton(
+                  icon: const Icon(Icons.point_of_sale, color: AppTheme.textMuted),
+                  onPressed: _confirmOpenDrawer,
+                  tooltip: 'Open Cash Drawer',
+                ),
+                const SizedBox(width: 4),
                 IconButton(
                   icon: const Icon(Icons.lock_outline, color: AppTheme.textMuted),
                   onPressed: _handleAdminAccess,

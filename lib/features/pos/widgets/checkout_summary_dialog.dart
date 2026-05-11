@@ -1,10 +1,13 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/cart_provider.dart';
 import '../../products/providers/product_provider.dart';
 import '../../../core/services/printer_service.dart';
+import '../../../core/services/cash_drawer_service.dart';
 import '../../../core/db/database_helper.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../models/drawer_log.dart';
 
 class CheckoutSummaryDialog extends StatefulWidget {
   const CheckoutSummaryDialog({super.key});
@@ -235,40 +238,134 @@ class _CheckoutSummaryDialogState extends State<CheckoutSummaryDialog> {
 
         final order = await DatabaseHelper.instance.getOrder(orderId);
         if (order != null && context.mounted) {
+          final isPaid = status == 'paid';
+
+          if (isPaid) {
+            unawaited(CashDrawerService.open(
+              reason: DrawerLog.reasonSalePaid,
+              orderId: order.id,
+            ));
+          }
+
           await showDialog(
             context: context,
-            barrierDismissible: false,
+            barrierDismissible: true,
             builder: (ctx) => AlertDialog(
               shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
               contentPadding: EdgeInsets.zero,
-              title: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
-                child: Text(status == 'paid' ? 'ORDER PAID' : 'ORDER SAVED'),
+              titlePadding: EdgeInsets.zero,
+              title: Container(
+                padding: const EdgeInsets.fromLTRB(20, 14, 8, 14),
+                decoration: BoxDecoration(
+                  color: isPaid ? AppTheme.primary : AppTheme.surface,
+                  border: const Border(bottom: BorderSide(color: AppTheme.outline)),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      isPaid ? Icons.check_circle : Icons.save_outlined,
+                      color: isPaid ? Colors.white : AppTheme.textMuted,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 10),
+                    Text(
+                      isPaid ? 'ORDER PAID' : 'ORDER SAVED',
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        fontWeight: FontWeight.w900,
+                        fontSize: 15,
+                        letterSpacing: 1.0,
+                        color: isPaid ? Colors.white : AppTheme.onSurface,
+                      ),
+                    ),
+                    const Spacer(),
+                    IconButton(
+                      onPressed: () => Navigator.pop(ctx),
+                      icon: Icon(Icons.close, color: isPaid ? Colors.white : AppTheme.textMuted, size: 20),
+                      tooltip: 'Close',
+                    ),
+                  ],
+                ),
               ),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Divider(height: 1),
-                  Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Text('Order #${order.id} processed successfully.', style: const TextStyle(fontSize: 13)),
-                  ),
-                  const Divider(height: 1),
-                  ListTile(
-                    leading: const Icon(Icons.receipt, size: 20),
-                    title: const Text('Customer Receipt', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-                    onTap: () => PrinterService.printCustomerReceipt(order),
-                    visualDensity: VisualDensity.compact,
-                  ),
-                  const Divider(height: 1),
-                  ListTile(
-                    leading: const Icon(Icons.restaurant, size: 20),
-                    title: const Text('Kitchen Ticket', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-                    onTap: () => PrinterService.printKitchenReceipt(order),
-                    visualDensity: VisualDensity.compact,
-                  ),
-                  const Divider(height: 1),
-                ],
+              content: SizedBox(
+                width: 380,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
+                      child: Column(
+                        children: [
+                          Text(
+                            'Order #${order.id}',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: AppTheme.textMuted,
+                              letterSpacing: 0.8,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          const Text(
+                            'TOTAL',
+                            style: TextStyle(
+                              fontFamily: 'Inter',
+                              fontSize: 10,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 1.5,
+                              color: AppTheme.textMuted,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Rs. ${order.totalAmount.toStringAsFixed(0)}',
+                            style: const TextStyle(
+                              fontFamily: 'Inter',
+                              fontSize: 36,
+                              fontWeight: FontWeight.w900,
+                              color: AppTheme.primary,
+                            ),
+                          ),
+                          if (isPaid) ...[
+                            const SizedBox(height: 10),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: AppTheme.primary.withOpacity(0.1),
+                                border: Border.all(color: AppTheme.primary.withOpacity(0.3)),
+                              ),
+                              child: const Text(
+                                'CASH DRAWER OPENED',
+                                style: TextStyle(
+                                  fontFamily: 'Inter',
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 1.2,
+                                  color: AppTheme.primary,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                    const Divider(height: 1),
+                    ListTile(
+                      leading: const Icon(Icons.receipt, size: 20),
+                      title: const Text('Customer Receipt', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                      onTap: () => PrinterService.printCustomerReceipt(order),
+                      visualDensity: VisualDensity.compact,
+                    ),
+                    const Divider(height: 1),
+                    ListTile(
+                      leading: const Icon(Icons.restaurant, size: 20),
+                      title: const Text('Kitchen Ticket', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                      onTap: () => PrinterService.printKitchenReceipt(order),
+                      visualDensity: VisualDensity.compact,
+                    ),
+                    const Divider(height: 1),
+                  ],
+                ),
               ),
               actions: [
                 TextButton(

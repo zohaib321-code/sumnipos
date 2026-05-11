@@ -5,6 +5,11 @@ class PrinterService {
     print("Printer Service: Initialized (Stub/Windows)");
   }
 
+  static Future<bool> openCashDrawer() async {
+    print("--- OPEN DRAWER STUB (no-op) ---");
+    return false;
+  }
+
   static Future<void> printReceipt(Order order) async {
     print("--- RECEIPT STUB ---");
     print("Order ID: ${order.id}");

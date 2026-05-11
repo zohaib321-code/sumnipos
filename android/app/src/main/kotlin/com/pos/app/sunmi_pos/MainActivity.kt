@@ -49,6 +49,19 @@ class MainActivity: FlutterActivity() {
                     sunmiPrinterService?.cutPaper(null)
                     result.success(true)
                 }
+                "OPEN_CASH_DRAWER" -> {
+                    try {
+                        val service = sunmiPrinterService
+                        if (service == null) {
+                            result.success(false)
+                        } else {
+                            service.openDrawer(null)
+                            result.success(true)
+                        }
+                    } catch (e: Exception) {
+                        result.success(false)
+                    }
+                }
                 "SEND_LCD_COMMAND" -> {
                     val command = call.argument<Int>("command") ?: 1
                     val text = call.argument<String>("text") ?: ""

@@ -160,6 +160,18 @@ class PrinterService {
     }
   }
 
+  static Future<bool> openCashDrawer() async {
+    if (kIsWeb) return false;
+    if (!Platform.isAndroid) return false;
+    try {
+      final result = await _channel.invokeMethod<bool>('OPEN_CASH_DRAWER');
+      return result == true;
+    } catch (e) {
+      debugPrint("Open Cash Drawer Error: $e");
+      return false;
+    }
+  }
+
   static Future<void> printKitchenReceipt(Order order) async {
     final settings = await DatabaseHelper.instance.getSettings();
     final device = PrinterDevice.fromString(settings.kitchenPrinter);
